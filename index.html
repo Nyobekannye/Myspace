@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#15222c" />
+    <title>myspace — your space, your people</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="myspace home">myspace</a>
+      <nav aria-label="Primary navigation">
+        <a class="active" href="#feed">Home</a>
+        <a href="#discover">Discover</a>
+        <a href="#messages">Messages <span class="notification-dot" aria-label="2 unread"></span></a>
+      </nav>
+      <button class="profile-button" type="button" aria-label="Open your profile">SN</button>
+    </header>
+
+    <main id="top">
+      <section class="welcome" aria-labelledby="welcome-title">
+        <div>
+          <p class="eyebrow">Saturday, September 12</p>
+          <h1 id="welcome-title">Good afternoon, Sari.</h1>
+          <p class="welcome-copy">Your corner of the internet is looking lively today.</p>
+        </div>
+        <button class="invite-button" type="button">Invite a friend <span aria-hidden="true">↗</span></button>
+      </section>
+
+      <div class="content-grid">
+        <aside class="sidebar" aria-label="Your profile and shortcuts">
+          <section class="profile-card">
+            <div class="profile-cover"></div>
+            <div class="avatar large-avatar">SN</div>
+            <div class="profile-details">
+              <h2>Sari Nufti</h2>
+              <p>@sari</p>
+              <p class="profile-bio">Designing good days and better digital spaces.</p>
+            </div>
+            <dl class="stats">
+              <div><dt>184</dt><dd>Friends</dd></div>
+              <div><dt>38</dt><dd>Posts</dd></div>
+            </dl>
+          </section>
+          <section class="shortcuts" aria-labelledby="shortcuts-title">
+            <h2 id="shortcuts-title">Your space</h2>
+            <a href="#photos"><span aria-hidden="true">▧</span> Photos</a>
+            <a href="#music"><span aria-hidden="true">♫</span> Top 8 playlist</a>
+            <a href="#events"><span aria-hidden="true">◇</span> Upcoming events</a>
+          </section>
+        </aside>
+
+        <section class="feed" id="feed" aria-labelledby="feed-title">
+          <div class="feed-heading"><h2 id="feed-title">Your feed</h2><button class="filter-button" type="button">Following <span aria-hidden="true">⌄</span></button></div>
+          <form class="composer" id="post-form">
+            <label for="post-content">Share something with your people</label>
+            <textarea id="post-content" maxlength="280" placeholder="What’s on your mind, Sari?" rows="3"></textarea>
+            <div class="composer-footer">
+              <div class="composer-tools">
+                <button type="button" aria-label="Add a photo">▧ <span>Photo</span></button>
+                <button type="button" aria-label="Add a feeling">☺ <span>Feeling</span></button>
+              </div>
+              <div class="post-controls"><output id="character-count" for="post-content">0 / 280</output><button class="post-button" type="submit" disabled>Post</button></div>
+            </div>
+          </form>
+          <div class="posts" id="posts">
+            <article class="post">
+              <div class="avatar lavender">MC</div>
+              <div class="post-body"><header><div><h3>Maya Chen</h3><p>35 minutes ago · <span aria-label="Visible to everyone">◉</span></p></div><button class="more-button" aria-label="More options for Maya's post">•••</button></header><p class="post-copy">Finally took the long way home through the park. The city feels completely different when you slow down enough to notice it. <span aria-hidden="true">🌿</span></p><footer><button type="button">♡ <span>12</span></button><button type="button">▢ <span>3 comments</span></button><button type="button">↗ <span>Share</span></button></footer></div>
+            </article>
+            <article class="post">
+              <div class="avatar orange">JT</div>
+              <div class="post-body"><header><div><h3>Jordan Tate</h3><p>2 hours ago · <span aria-label="Visible to everyone">◉</span></p></div><button class="more-button" aria-label="More options for Jordan's post">•••</button></header><p class="post-copy">Made a tiny playlist for the rainy-weekend crowd. Starts soft, ends with a little bit of dancing in the kitchen.</p><div class="playlist"><div class="playlist-art" aria-hidden="true">♫</div><div><p class="playlist-label">PLAYLIST</p><h4>Window Seat Weather</h4><p>18 songs · 1 hr 6 min</p></div><button type="button" aria-label="Play Window Seat Weather">▶</button></div><footer><button type="button">♡ <span>28</span></button><button type="button">▢ <span>7 comments</span></button><button type="button">↗ <span>Share</span></button></footer></div>
+            </article>
+          </div>
+        </section>
+
+        <aside class="right-rail" aria-label="Suggestions">
+          <section class="friends-card"><div class="section-heading"><h2>Friend requests</h2><a href="#requests">See all</a></div><div class="friend-row"><div class="avatar blue">AK</div><div><h3>Amelia King</h3><p>8 mutual friends</p><div class="friend-actions"><button class="confirm-button" type="button">Confirm</button><button class="decline-button" type="button">Not now</button></div></div></div></section>
+          <section class="discover-card" id="discover"><p class="eyebrow">DISCOVER</p><h2>Spaces made for you</h2><p>Find people making, sharing, and celebrating the things you love.</p><a href="#explore">Explore communities <span aria-hidden="true">→</span></a></section>
+        </aside>
+      </div>
+    </main>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
