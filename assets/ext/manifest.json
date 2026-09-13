@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Sesi MAX MODE",
     "short_name": "MAX MODE",
-    "version": "2.5",
+    "version": "2.6",
     "description": "Sesi MAX MODE by Whempy & Dhon — Dola companion: every video 30s as ONE single clip (never 2), max HD, no watermark. Aggressive single-clip enforcer. Auto-download optional (Settings).",
     "icons": {
         "16": "icon16.png",

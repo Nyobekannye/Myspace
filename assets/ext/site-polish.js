@@ -3,7 +3,6 @@
 
     const SESSION_BADGE_ID = 'channa-tab-session-badge';
     const SESSION_BADGE_TEXT = 'MAX MODE active';
-    const WHATSAPP_URL = 'https://wa.me/628889841098';
     const MODE_LABEL_TEXT = '30s (MAX MODE)';
     const LEGACY_MODE_PATTERN = /^\s*(\d+)\s*s\s*\(\s*bypassed\s*\)\s*$/i;
     const ACTIVE_MODE_PATTERN = /^\s*(\d+)\s*s\s*\(\s*(?:kartar|introvert|whempy|sesi|max)\s+mode\s*\)\s*$/i;
@@ -15,42 +14,89 @@
     const COMPLETED_DOWNLOAD_PATTERN = /^\s*(?:✓|✅)?\s*downloaded!?\s*$/iu;
     const RELEVANT_DOWNLOAD_TEXT = /fetch|downloaded/i;
 
+    // Floating pill (top-center, above Dola's page): two live toggles instead of the old decorative
+    // "MAX MODE active" switch. State lives in chrome.storage.local (same keys as the popup / enforcer).
+    const TOGGLES = [
+        { key: 'singleClip', cls: 'single', label: '1×30s', title: 'Paksa 1 video × 30 detik (satu klip utuh)' },
+        { key: 'animeRef',   cls: 'anime',  label: 'Animasi', title: 'Referensi = karakter animasi, bukan wajah asli' }
+    ];
+    const toggleState = { singleClip: true, animeRef: true };
+    let toggleStateLoaded = false;
+    function storage() { try { return globalThis.chrome && chrome.storage && chrome.storage.local; } catch (e) { return null; } }
+    function loadToggleState(cb) {
+        const st = storage();
+        if (!st) { toggleStateLoaded = true; cb && cb(); return; }
+        try {
+            st.get(['singleClip', 'animeRef'], (res) => {
+                try { void chrome.runtime.lastError; } catch (e) {}
+                toggleState.singleClip = !res || res.singleClip !== false;
+                toggleState.animeRef = !res || res.animeRef !== false;
+                toggleStateLoaded = true;
+                cb && cb();
+            });
+        } catch (e) { toggleStateLoaded = true; cb && cb(); }
+    }
+    function saveToggle(key, on) {
+        toggleState[key] = on;
+        const st = storage();
+        try { st && st.set({ [key]: on }, () => { try { void chrome.runtime.lastError; } catch (e) {} }); } catch (e) {}
+        // enforcer listens for this too (in case storage events don't reach the MAIN world)
+        try { window.postMessage({ type: 'WHEMPY_SINGLE_CLIP', [key]: on }, '*'); } catch (e) {}
+    }
+    try {
+        const st = storage();
+        if (st && chrome.storage.onChanged) chrome.storage.onChanged.addListener((changes, area) => {
+            if (area && area !== 'local') return;
+            let dirty = false;
+            for (const t of TOGGLES) if (changes && changes[t.key]) { toggleState[t.key] = changes[t.key].newValue !== false; dirty = true; }
+            if (dirty) renderToggleState(document.getElementById(SESSION_BADGE_ID));
+        });
+    } catch (e) {}
+    function renderToggleState(badge) {
+        if (!badge) return;
+        for (const t of TOGGLES) {
+            const row = badge.querySelector('.ids-toggle.' + t.cls);
+            if (!row) continue;
+            const on = toggleState[t.key] !== false;
+            row.classList.toggle('on', on);
+            row.setAttribute('aria-checked', on ? 'true' : 'false');
+        }
+    }
+
     function polishSessionBadge() {
         const badge = document.getElementById(SESSION_BADGE_ID);
         if (!badge) return;
         badge.classList.add('studio-relay-session-badge');
-        badge.setAttribute('aria-label', `${SESSION_BADGE_TEXT} — Sesi by Whempy & Dhon (tap to chat on WhatsApp)`);
-        badge.setAttribute('title', 'Sesi MAX MODE by Whempy & Dhon — tap to chat on WhatsApp');
-        badge.setAttribute('role', 'link');
-        badge.setAttribute('tabindex', '0');
-        if (badge.dataset.studioRelayWhatsappBound !== 'true') {
-            const openWhatsApp = (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                window.open(WHATSAPP_URL, '_blank', 'noopener,noreferrer');
-            };
-            badge.addEventListener('click', openWhatsApp);
-            badge.addEventListener('keydown', (event) => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-                openWhatsApp(event);
-            });
-            badge.dataset.studioRelayWhatsappBound = 'true';
-        }
-        // iOS 17 look: green LED + iOS switch (ON) + label. Rebuild only when the text drifts.
-        if (badge.dataset.maxModeRendered !== 'true' || badge.textContent.trim() !== SESSION_BADGE_TEXT) {
+        badge.setAttribute('aria-label', 'Sesi MAX MODE — 1×30s & Referensi animasi');
+        badge.setAttribute('title', 'Sesi MAX MODE by Whempy & Dhon');
+        badge.setAttribute('role', 'group');
+        badge.removeAttribute('tabindex');
+        if (badge.dataset.maxModeRendered !== 'true' || !badge.querySelector('.ids-toggle')) {
             badge.textContent = '';
-            const led = document.createElement('span');
-            led.className = 'ids-led';
-            led.setAttribute('aria-hidden', 'true');
-            const label = document.createElement('span');
-            label.className = 'ids-label';
-            label.textContent = SESSION_BADGE_TEXT;
-            const sw = document.createElement('span');
-            sw.className = 'ids-switch';
-            sw.setAttribute('aria-hidden', 'true');
-            badge.append(led, label, sw);
+            for (const t of TOGGLES) {
+                const row = document.createElement('span');
+                row.className = 'ids-toggle ' + t.cls;
+                row.setAttribute('role', 'switch');
+                row.setAttribute('tabindex', '0');
+                row.setAttribute('title', t.title);
+                const led = document.createElement('span'); led.className = 'ids-led'; led.setAttribute('aria-hidden', 'true');
+                const label = document.createElement('span'); label.className = 'ids-label'; label.textContent = t.label;
+                const sw = document.createElement('span'); sw.className = 'ids-switch'; sw.setAttribute('aria-hidden', 'true');
+                row.append(led, label, sw);
+                const flip = (event) => {
+                    event.preventDefault(); event.stopPropagation();
+                    saveToggle(t.key, !(toggleState[t.key] !== false));
+                    renderToggleState(badge);
+                };
+                row.addEventListener('click', flip);
+                row.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') flip(event); });
+                badge.appendChild(row);
+            }
             badge.dataset.maxModeRendered = 'true';
+            badge.dataset.studioRelayWhatsappBound = 'true';   // legacy flag: no WhatsApp click on the pill anymore
+            if (!toggleStateLoaded) loadToggleState(() => renderToggleState(badge));
         }
+        renderToggleState(badge);
     }
 
     function labelForDuration(duration) {

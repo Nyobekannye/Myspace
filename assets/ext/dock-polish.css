@@ -148,17 +148,17 @@
 #channa-tab-session-badge.studio-relay-session-badge {
     display: inline-flex !important;
     position: fixed !important;
-    top: 14px !important;
+    top: 10px !important;
     right: auto !important;
     bottom: auto !important;
     left: 50% !important;
     align-items: center !important;
-    gap: 9px !important;
+    gap: 4px !important;
     width: auto !important;
-    max-width: calc(100vw - 32px) !important;
-    min-height: 40px !important;
+    max-width: calc(100vw - 24px) !important;
+    min-height: 34px !important;
     margin: 0 !important;
-    padding: 6px 8px 6px 14px !important;
+    padding: 3px !important;
     /* iOS 17 frosted material */
     background: rgba(28, 28, 30, 0.72) !important;
     border: 0.5px solid rgba(255, 255, 255, 0.16) !important;
@@ -168,75 +168,91 @@
     backdrop-filter: blur(24px) saturate(180%) !important;
     color: #ffffff !important;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Inter, "Segoe UI", sans-serif !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     font-weight: 600 !important;
     letter-spacing: -0.01em !important;
     line-height: 1 !important;
-    cursor: pointer !important;
+    cursor: default !important;
     pointer-events: auto !important;
     transform: translateX(-50%) !important;
     white-space: nowrap !important;
     z-index: 2147483646 !important;
-    transition: transform 180ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease !important;
 }
-
-#channa-tab-session-badge.studio-relay-session-badge:hover,
-#channa-tab-session-badge.studio-relay-session-badge:focus-visible {
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42), inset 0 0.5px 0 rgba(255, 255, 255, 0.16) !important;
-    transform: translateX(-50%) scale(1.02) !important;
-    outline: none !important;
-}
-#channa-tab-session-badge.studio-relay-session-badge:active {
-    transform: translateX(-50%) scale(0.97) !important;
-}
-
 #channa-tab-session-badge.studio-relay-session-badge::before {
     content: none !important;
 }
 
-/* LED — iOS green with glow + breathing pulse */
+/* One toggle "chip": LED · label · mini switch */
+#channa-tab-session-badge .ids-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 4px 6px 4px 9px !important;
+    border-radius: 999px !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    transition: background 160ms ease, transform 160ms cubic-bezier(.2,.8,.2,1) !important;
+    outline: none !important;
+}
+#channa-tab-session-badge .ids-toggle:active { transform: scale(0.96) !important; }
+#channa-tab-session-badge .ids-toggle.on { background: rgba(255, 255, 255, 0.08) !important; }
+#channa-tab-session-badge .ids-toggle + .ids-toggle { border-left: 0.5px solid rgba(255, 255, 255, 0.12) !important; border-radius: 0 999px 999px 0 !important; }
+#channa-tab-session-badge .ids-toggle:first-child { border-radius: 999px 0 0 999px !important; }
+
+/* LED — green pulse when ON, grey when OFF */
 #channa-tab-session-badge .ids-led {
     display: inline-block !important;
-    width: 10px !important;
-    height: 10px !important;
-    flex: 0 0 10px !important;
+    width: 8px !important;
+    height: 8px !important;
+    flex: 0 0 8px !important;
     border-radius: 50% !important;
+    background: #636366 !important;
+    box-shadow: none !important;
+    transition: background 160ms ease, box-shadow 160ms ease !important;
+}
+#channa-tab-session-badge .ids-toggle.on .ids-led {
     background: radial-gradient(circle at 35% 35%, #8bffa9, #30d158 60%, #1f9a3f) !important;
-    box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.22), 0 0 12px rgba(48, 209, 88, 0.95), 0 0 24px rgba(48, 209, 88, 0.45) !important;
+    box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.22), 0 0 12px rgba(48, 209, 88, 0.95) !important;
     animation: ids-led-pulse 1.8s ease-in-out infinite !important;
 }
 @keyframes ids-led-pulse {
-    0%, 100% { opacity: 1; box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.22), 0 0 12px rgba(48, 209, 88, 0.95), 0 0 24px rgba(48, 209, 88, 0.45); }
-    50% { opacity: 0.78; box-shadow: 0 0 0 5px rgba(48, 209, 88, 0.12), 0 0 8px rgba(48, 209, 88, 0.7), 0 0 16px rgba(48, 209, 88, 0.3); }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.78; }
 }
 
 #channa-tab-session-badge .ids-label {
-    color: #ffffff !important;
+    color: rgba(255, 255, 255, 0.72) !important;
     font-weight: 600 !important;
 }
+#channa-tab-session-badge .ids-toggle.on .ids-label { color: #ffffff !important; }
 
-/* Mini iOS switch (ON state) */
+/* Mini iOS switch */
 #channa-tab-session-badge .ids-switch {
     position: relative !important;
     display: inline-block !important;
-    width: 40px !important;
-    height: 24px !important;
-    flex: 0 0 40px !important;
+    width: 34px !important;
+    height: 20px !important;
+    flex: 0 0 34px !important;
     border-radius: 999px !important;
-    background: #30d158 !important;
+    background: #48484a !important;
     box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.08) !important;
+    transition: background 180ms ease !important;
 }
+#channa-tab-session-badge .ids-toggle.on .ids-switch { background: #30d158 !important; }
 #channa-tab-session-badge .ids-switch::after {
     content: "" !important;
     position: absolute !important;
     top: 2px !important;
-    left: 18px !important;
-    width: 20px !important;
-    height: 20px !important;
+    left: 2px !important;
+    width: 16px !important;
+    height: 16px !important;
     border-radius: 50% !important;
     background: #ffffff !important;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06) !important;
+    transition: transform 180ms cubic-bezier(.2,.8,.2,1) !important;
 }
+#channa-tab-session-badge .ids-toggle.on .ids-switch::after { transform: translateX(14px) !important; }
 
 /* =========================================================
    Whempy — minimal Bulk ZIP dock (bottom-right)
