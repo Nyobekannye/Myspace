@@ -2,6 +2,8 @@
 
 Bot Telegram untuk menerima pesanan otomatis: pembeli lihat katalog → masukkan keranjang → checkout → **bayar QRIS, status lunas otomatis** → admin tinggal kirim barang. Data produk dan pesanan disimpan di file JSON, tanpa database.
 
+> **Baru pertama kali?** Baca [TUTORIAL.md](TUTORIAL.md) — panduan langkah demi langkah dari pasang Node.js sampai bot jalan 24 jam.
+
 ## Fitur
 
 **Pembeli**
