@@ -10,16 +10,15 @@
   const utils = globalThis.AxiomDolaUtils;
   let bypassFaceFilter = false;
 
-  function rewriteJsonBody(body) {
-    if (typeof body !== "string") return body;
-    let parsed;
-    try {
-      parsed = JSON.parse(body);
-    } catch {
-      return body;
-    }
-    const result = utils.stripFaceFilterParams(parsed);
-    return result.changed ? JSON.stringify(result.value) : body;
+  function headerValue(headers, name) {
+    if (!headers) return "";
+    if (typeof headers.get === "function") return headers.get(name) || "";
+    if (typeof headers === "object") return headers[name] || headers[name.toLowerCase()] || "";
+    return "";
+  }
+
+  function rewriteJsonBody(body, contentType) {
+    return utils.rewriteBody(body, contentType);
   }
 
   window.addEventListener("message", event => {
@@ -82,7 +81,7 @@
       options.body != null &&
       utils.isDolaHostUrl(requestUrl, location.href)
     ) {
-      const body = rewriteJsonBody(options.body);
+      const body = rewriteJsonBody(options.body, headerValue(options.headers, "content-type"));
       if (body !== options.body) {
         args = [...args];
         args[1] = { ...options, body };
@@ -119,8 +118,8 @@
       body != null &&
       utils.isDolaHostUrl(this.__axiomDolaUrl || "", location.href)
     ) {
-      const next = rewriteJsonBody(typeof body === "string" ? body : "");
-      if (typeof body === "string" && next !== body) body = next;
+      const next = rewriteJsonBody(body, "");
+      if (body !== next) body = next;
     }
     return nativeSend.call(this, body);
   };

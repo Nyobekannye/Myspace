@@ -6,6 +6,7 @@ const {
   isAllowedMediaUrl,
   isDolaHostUrl,
   normalizeUrl,
+  rewriteBody,
   safeFilename,
   stripFaceFilterParams,
 } = require("../src/media-utils.js");
@@ -91,4 +92,44 @@ test("detects dola.com API hosts for request interception", () => {
   assert.equal(isDolaHostUrl("/samantha/video/do_generate", "https://www.dola.com/generate"), true);
   assert.equal(isDolaHostUrl("https://cdn.dola.com/api/x", "https://www.dola.com/"), true);
   assert.equal(isDolaHostUrl("https://evil.example/x", "https://www.dola.com/"), false);
+});
+
+test("keeps photo references while stripping filter settings", () => {
+  const { changed, value } = stripFaceFilterParams({
+    prompt: "halo",
+    face_url: "https://cdn.dola.com/u/photo.jpg",
+    face_id: "abc123",
+    portrait: { url: "data:image/jpeg;base64,/9j/4AAQ" },
+    face: true,
+  });
+  assert.equal(changed, true);
+  assert.deepEqual(value, {
+    prompt: "halo",
+    face_url: "https://cdn.dola.com/u/photo.jpg",
+    face_id: "abc123",
+    portrait: { url: "data:image/jpeg;base64,/9j/4AAQ" },
+  });
+});
+
+test("rewrites JSON bodies but leaves clean bodies untouched", () => {
+  const body = JSON.stringify({ prompt: "x", face_filter: 1, portrait: { mode: "on" } });
+  assert.equal(rewriteBody(body, "application/json"), JSON.stringify({ prompt: "x" }));
+  const plain = JSON.stringify({ prompt: "x", config: { a: 1 } });
+  assert.equal(rewriteBody(plain, "application/json"), plain);
+});
+
+test("rewrites urlencoded bodies", () => {
+  assert.equal(rewriteBody("prompt=x&face_filter=1&beauty=high", "application/x-www-form-urlencoded"), "prompt=x");
+});
+
+test("rewrites multipart bodies but keeps the uploaded photo file", () => {
+  const body = new FormData();
+  body.append("photo", new File(["fakeimage"], "wajah.jpg", { type: "image/jpeg" }));
+  body.append("prompt", "halo");
+  body.append("beauty_level", "3");
+  const out = rewriteBody(body, "multipart/form-data");
+  assert.notEqual(out, body);
+  assert.equal(out.has("photo"), true);
+  assert.equal(out.has("prompt"), true);
+  assert.equal(out.has("beauty_level"), false);
 });

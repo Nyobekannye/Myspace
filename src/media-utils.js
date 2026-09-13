@@ -7,7 +7,9 @@
 
   const MEDIA_EXTENSION = /\.(?:mp4|webm|mov|m3u8)(?:$|[?#])/i;
   const MEDIA_KEY = /(?:play|download|video|media|main|backup|origin|source).*(?:url|uri)|(?:url|uri)/i;
-  const FACE_PARAM_TERMS = /(?:face\s*(?:filter|swap|effect)|faceswap|face_swap|face_filter|facefilter|portrait|beautify|beauty|retouch|filter\s*wajah|tukar\s*wajah|\bwajah\b|\bface\b)/i;
+  const FACE_FILTER_TERMS = /(?:beaut(?:y|ify)|retouch|whiten|smooth|face_?filter|face_?swap|face_?enhance|face\s*filter|face\s*swap|filter.*(?:face|portrait|wajah)|tukar\s*wajah|filter\s*wajah)/i;
+  const FACE_REFERENCE_TERMS = /(?:face|portrait|wajah|avatar|foto|photo|pict(?:ure)?|img|image).*(?:id|url|uri|key|path|src|file)/i;
+  const FACE_BROAD_TERMS = /\bface\b|\bwajah\b|portrait/i;
   const ALLOWED_HOST_SUFFIXES = [
     "dola.com",
     "ciciai.com",
@@ -95,6 +97,26 @@
     return `${clean || "dola-video-hd"}.mp4`;
   }
 
+  function isMediaValue(value) {
+    return (
+      typeof value === "string" &&
+      (/^https?:\/\//i.test(value) || /^data:/i.test(value) || value.length > 200)
+    ) || (
+      typeof File !== "undefined" && value instanceof File
+    ) || (
+      typeof Blob !== "undefined" && value instanceof Blob
+    );
+  }
+
+  function holdsMediaReference(item, depth = 0) {
+    if (depth > 6) return false;
+    if (Array.isArray(item)) return item.some(child => holdsMediaReference(child, depth + 1));
+    if (!item || typeof item !== "object") return false;
+    return Object.entries(item).some(([key, child]) =>
+      FACE_REFERENCE_TERMS.test(key) || isMediaValue(child) || holdsMediaReference(child, depth + 1)
+    );
+  }
+
   function stripFaceFilterParams(value, depth = 0) {
     if (depth > 20) return { changed: false, value };
     if (Array.isArray(value)) {
@@ -110,7 +132,17 @@
       let changed = false;
       const next = {};
       for (const [key, item] of Object.entries(value)) {
-        if (FACE_PARAM_TERMS.test(key)) {
+        if (FACE_REFERENCE_TERMS.test(key)) {
+          const result = stripFaceFilterParams(item, depth + 1);
+          if (result.changed) changed = true;
+          next[key] = result.value;
+          continue;
+        }
+        if (FACE_FILTER_TERMS.test(key) && !isMediaValue(item)) {
+          changed = true;
+          continue;
+        }
+        if (FACE_BROAD_TERMS.test(key) && !isMediaValue(item) && !holdsMediaReference(item)) {
           changed = true;
           continue;
         }
@@ -121,6 +153,61 @@
       return changed ? { changed, value: next } : { changed: false, value };
     }
     return { changed: false, value };
+  }
+
+  function rewriteBody(body, contentType) {
+    if (typeof body === "string") {
+      const trimmed = body.trim();
+      if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          const result = stripFaceFilterParams(parsed);
+          return result.changed ? JSON.stringify(result.value) : body;
+        } catch {
+          return body;
+        }
+      }
+      if (/[?&][^=]+=/.test(trimmed)) {
+        try {
+          const source = new URLSearchParams(trimmed);
+          const next = new URLSearchParams();
+          let changed = false;
+          for (const [key, value] of source) {
+            const strip = FACE_FILTER_TERMS.test(key) ||
+              (FACE_BROAD_TERMS.test(key) && !isMediaValue(value));
+            if (strip) {
+              changed = true;
+              continue;
+            }
+            next.append(key, value);
+          }
+          return changed ? next.toString() : body;
+        } catch {
+          return body;
+        }
+      }
+      return body;
+    }
+    if (typeof FormData !== "undefined" && typeof body?.entries === "function") {
+      try {
+        const next = new FormData();
+        let changed = false;
+        for (const [key, value] of body.entries()) {
+          const strip = !isMediaValue(value) && (
+            FACE_FILTER_TERMS.test(key) || (FACE_BROAD_TERMS.test(key) && !isMediaValue(value))
+          );
+          if (strip) {
+            changed = true;
+            continue;
+          }
+          next.append(key, value);
+        }
+        return changed ? next : body;
+      } catch {
+        return body;
+      }
+    }
+    return body;
   }
 
   function isDolaHostUrl(value, baseUrl) {
@@ -139,6 +226,7 @@
     isAllowedMediaUrl,
     isDolaHostUrl,
     normalizeUrl,
+    rewriteBody,
     safeFilename,
     stripFaceFilterParams,
   };

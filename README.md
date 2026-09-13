@@ -6,9 +6,9 @@ Ekstensi Manifest V3 untuk:
 - memilih MP4 beresolusi tertinggi yang tersedia;
 - mengunduh melalui Chrome Downloads;
 - menyembunyikan kontrol filter wajah/portrait agar tidak terpakai tanpa sengaja;
-- **mode bypass filter wajah**: menetralkan parameter wajah (`face_filter`, `portrait`, `beautify`, `retouch`, dll.) pada body JSON permintaan API Dola di sesi pengguna sendiri, sehingga hasil generasi video tidak menerapkan filter wajah.
+- **mode bypass filter wajah**: mengosongkan pengaturan filter wajah (face filter, beautify, retouch, portrait, dll.) dari body permintaan API Dola di sesi pengguna sendiri, sambil tetap mengirim referensi foto wajah (URL/ID/berkas unggahan). Hasilnya, video generasi yang memakai wajah manusia asli tidak menerapkan efek filter wajah Dola.
 
-Ekstensi ini tidak membuka autentikasi, tidak mengubah status otorisasi pengguna lain, tidak menghapus watermark secara paksa, dan hanya bekerja dengan media serta sesi Dola pengguna sendiri. Mode bypass adalah preferensi "tanpa efek wajah" pada sesi milik pengguna, bukan penerobosan izin.
+Ekstensi ini tidak membuka autentikasi, tidak menghapus watermark secara paksa, dan hanya bekerja dengan media serta sesi Dola pengguna sendiri. Mode bypass adalah preferensi "tanpa efek filter wajah" pada konten milik pengguna — bukan penerobosan izin orang lain. Gerbang persetujuan Dola (mis. `creation_portrait_video_auth_confirm`) tidak dilewati otomatis.
 
 ## Pasang untuk uji coba
 
@@ -24,9 +24,9 @@ Jika Dola hanya memberikan stream HLS (`.m3u8`), ekstensi menolak mengunduh mani
 
 Di popup ekstensi (ikon Dola HD), aktifkan **Bypass filter wajah** (bawaan: aktif).
 
-Cara kerja: skrip di halaman (`page-bridge.js`) menyadap `fetch` dan `XMLHttpRequest` Dola, lalu menghapus atau menonaktifkan parameter terkait wajah pada body JSON yang dikirim ke host `dola.com`. Parameter yang ditargetkan cocok dengan istilah seperti `face`, `face_filter`, `face_swap`, `portrait`, `beautify`, `beauty`, dan `retouch`. Kunci lain seperti `prompt`, `config`, `video`, dan `profile` tidak disentuh. Toggle **Sembunyikan filter wajah** tetap menyembunyikan kontrol UI-nya.
+Cara kerja: skrip di halaman (`page-bridge.js`) menyadap `fetch` dan `XMLHttpRequest` Dola pada sesi pengguna sendiri, lalu memangkas pengaturan filter wajah di body permintaan yang menuju host `dola.com` — mencakup body JSON, form-urlencoded, dan unggahan multipart. Yang dibuang hanya kunci pengaturan efek: `face_filter`, `beautify`, `beauty_level`, `retouch`, `portrait` (mode), dsb. Referensi foto (mis. `face_url`, `portrait_url`, `photo`, berkas unggahan di multipart) **tetap dipertahankan**, sehingga wajah asli tetap terpakai tanpa efek filter.
 
-Catatan: karena nama parameter API hasil generasi tidak didokumentasikan publik dan nama pemutar selalu berubah, mode ini disetel agar cocok dengan pola umum; verifikasi akhir dilakukan langsung di Dola dari wilayah yang tidak dibatasi.
+Catatan: karena payload generasi Dola tidak mendokumentasikan nama parameter secara publik, pola ini disetel ke istilah wajah/filter yang umum; verifikasi akhir dilakukan langsung di Dola dari wilayah yang tidak dibatasi.
 
 ## Pengujian
 
