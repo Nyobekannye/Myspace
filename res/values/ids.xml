@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Kunci View.setTag: ScriptHandler[] skrip MAX MODE per WebView (dilepas & dipasang ulang saat mode desktop berubah) -->
+    <item name="tag_maxmode" type="id" />
+</resources>

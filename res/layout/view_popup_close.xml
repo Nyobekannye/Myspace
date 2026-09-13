@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tombol tutup melayang di atas popup MAX MODE (popup.html tidak punya tombol kembali sendiri) -->
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:layout_gravity="top|end"
+    android:layout_marginTop="10dp"
+    android:layout_marginEnd="10dp"
+    android:padding="10dp"
+    android:src="@drawable/ic_close"
+    android:tint="@color/text"
+    android:background="@drawable/bg_circle_ink"
+    android:elevation="6dp"
+    android:contentDescription="Tutup" />

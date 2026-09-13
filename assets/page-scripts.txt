@@ -1,0 +1,6 @@
+ext/media-extractor.js
+ext/inject.js
+ext/single-clip-enforcer.js
+ext/content.js
+ext/raw-watermark-free-downloader.js
+ext/site-polish.js

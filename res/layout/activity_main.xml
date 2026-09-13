@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg">
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="62dp">
+
+        <!-- ===== Top chrome (header + URL) — menyusut & terkunci saat halaman di-scroll ===== -->
+        <LinearLayout
+            android:id="@+id/topChrome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="6dp">
+
+                <ImageView
+                    android:id="@+id/appLogo"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:src="@drawable/ic_logo"
+                    android:contentDescription="Sesi" />
+
+                <TextView
+                    android:id="@+id/appTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="Sesi"
+                    android:textSize="22sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="-0.02"
+                    android:textColor="@color/text" />
+
+                <ImageView
+                    android:id="@+id/btnSettings"
+                    style="@style/IconBtn"
+                    android:src="@drawable/ic_tune"
+                    android:contentDescription="Pengaturan" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/lblSessions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="6dp"
+                android:text="@string/your_sessions"
+                android:textSize="13sp"
+                android:textColor="@color/text2" />
+
+            <HorizontalScrollView
+                android:id="@+id/sessionScroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:overScrollMode="never"
+                android:clipToPadding="false"
+                android:clipChildren="false"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+                <LinearLayout
+                    android:id="@+id/sessionRow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="6dp" />
+            </HorizontalScrollView>
+        </LinearLayout>
+
+        <!-- ===== URL pill ===== -->
+        <id.kuli.sesibrowser.SwipeRow
+            android:id="@+id/urlPill"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_pill"
+            android:paddingStart="16dp"
+            android:paddingEnd="6dp">
+
+            <ImageView
+                android:id="@+id/urlIcon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_search"
+                android:tint="@color/text2" />
+
+            <EditText
+                android:id="@+id/urlBar"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:background="@null"
+                android:hint="@string/hint_url"
+                android:textColor="@color/text"
+                android:textColorHint="@color/text3"
+                android:textSize="15sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:inputType="textUri|textNoSuggestions"
+                android:imeOptions="actionGo|flagNoExtractUi"
+                android:selectAllOnFocus="true" />
+
+            <ImageView
+                android:id="@+id/btnExpand"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="11dp"
+                android:src="@drawable/ic_expand"
+                android:tint="@color/text2"
+                android:background="@drawable/bg_circle_ripple"
+                android:contentDescription="Layar penuh" />
+
+            <ImageView
+                android:id="@+id/btnClear"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="11dp"
+                android:src="@drawable/ic_close"
+                android:tint="@color/text2"
+                android:background="@drawable/bg_circle_ripple"
+                android:visibility="gone" />
+        </id.kuli.sesibrowser.SwipeRow>
+        </LinearLayout>
+
+        <!-- ===== Kartu web ===== -->
+        <FrameLayout
+            android:id="@+id/webCard"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_web_card"
+            android:clipToOutline="true"
+            android:clipChildren="true">
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:layout_gravity="top"
+                android:progressDrawable="@drawable/progress_gradient"
+                android:max="100"
+                android:progress="0"
+                android:alpha="0" />
+
+            <!-- Tombol di sisi kanan: keluar dari mode penuh (tampilkan header lagi) -->
+            <FrameLayout
+                android:id="@+id/btnShrink"
+                android:layout_width="30dp"
+                android:layout_height="48dp"
+                android:layout_gravity="end|center_vertical"
+                android:background="@drawable/bg_shrink"
+                android:visibility="gone"
+                android:alpha="0">
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_shrink"
+                    android:tint="#FFFFFF"
+                    android:alpha="0.9" />
+            </FrameLayout>
+        </FrameLayout>
+
+    </LinearLayout>
+
+        <!-- ===== Nav pill ===== -->
+    <!-- ===== Nav pill (melayang di atas web, menempel bawah) ===== -->
+    <FrameLayout
+            android:id="@+id/navWrap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+            <id.kuli.sesibrowser.SwipeRow
+                android:id="@+id/nav"
+                android:layout_width="wrap_content"
+                android:layout_height="46dp"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_nav"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:elevation="4dp">
+
+                <ImageView android:id="@+id/btnBack" style="@style/NavBtn" android:src="@drawable/ic_back" android:contentDescription="Kembali" />
+                <ImageView android:id="@+id/btnForward" style="@style/NavBtn" android:src="@drawable/ic_forward" android:contentDescription="Maju" />
+
+                <FrameLayout
+                    android:id="@+id/btnUrl"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="@drawable/bg_circle_ripple_ink">
+                    <ImageView
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_circle_white"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_search"
+                        android:tint="@color/ink" />
+                </FrameLayout>
+
+                <ImageView android:id="@+id/btnReload" style="@style/NavBtn" android:src="@drawable/ic_reload" android:contentDescription="Muat ulang" />
+
+                <FrameLayout
+                    android:id="@+id/btnTabs"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circle_ripple_ink"
+                    android:contentDescription="Tab">
+                    <TextView
+                        android:id="@+id/tabCount"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:text="1"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/on_ink"
+                        android:includeFontPadding="false"
+                        android:background="@drawable/bg_tab_count" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/btnSession"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circle_ripple_ink">
+                    <id.kuli.sesibrowser.AvatarView
+                        android:id="@+id/navAvatar"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center" />
+            </FrameLayout>
+            </id.kuli.sesibrowser.SwipeRow>
+    </FrameLayout>
+
+    <!-- ===== Nav tersusut: bulatan kecil di tepi kanan (ketuk = kembalikan nav, geser = pindah naik/turun) ===== -->
+    <FrameLayout
+        android:id="@+id/navDock"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bg_nav_dock"
+        android:elevation="4dp"
+        android:visibility="gone">
+        <id.kuli.sesibrowser.AvatarView
+            android:id="@+id/dockAvatar"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_gravity="center" />
+    </FrameLayout>
+
+    <!-- ===== Address bar cepat (muncul di atas nav saat mode penuh) ===== -->
+    <LinearLayout
+        android:id="@+id/quickUrl"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_pill"
+        android:elevation="6dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="6dp"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_search"
+            android:tint="@color/text2" />
+        <EditText
+            android:id="@+id/quickUrlBar"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:background="@null"
+            android:hint="@string/hint_url"
+            android:textColor="@color/text"
+            android:textColorHint="@color/text3"
+            android:textSize="15sp"
+            android:singleLine="true"
+            android:inputType="textUri|textNoSuggestions"
+            android:imeOptions="actionGo|flagNoExtractUi"
+            android:selectAllOnFocus="true" />
+        <ImageView
+            android:id="@+id/quickClose"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="11dp"
+            android:src="@drawable/ic_close"
+            android:tint="@color/text2"
+            android:background="@drawable/bg_circle_ripple" />
+    </LinearLayout>
+
+    <!-- ===== Overlay pindah sesi ===== -->
+    <LinearLayout
+        android:id="@+id/switchOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@color/bg"
+        android:clickable="true"
+        android:visibility="gone"
+        android:alpha="0">
+        <id.kuli.sesibrowser.AvatarView
+            android:id="@+id/overlayAvatar"
+            android:layout_width="88dp"
+            android:layout_height="88dp" />
+        <TextView
+            android:id="@+id/overlayText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/text"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Menyiapkan identitas &amp; cookie terpisah…"
+            android:textColor="@color/text2"
+            android:textSize="13sp" />
+    </LinearLayout>
+</FrameLayout>

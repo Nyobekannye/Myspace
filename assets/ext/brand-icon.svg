@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+  <title id="title">Sesi</title>
+  <path d="M15,2 h18 a13,13 0 0 1 13,13 v18 a13,13 0 0 1 -13,13 h-18 a13,13 0 0 1 -13,-13 v-18 a13,13 0 0 1 13,-13 z" fill="#17181C"/>
+  <path d="M19,9 h10 a6,6 0 0 1 6,6 v20 h-22 v-20 a6,6 0 0 1 6,-6 z" fill="#F4F1EA" fill-opacity="0.28"/>
+  <path d="M17,12.5 h14 a6,6 0 0 1 6,6 v20 h-26 v-20 a6,6 0 0 1 6,-6 z" fill="#F4F1EA" fill-opacity="0.55"/>
+  <path d="M16,16 h16 a7,7 0 0 1 7,7 v10 a7,7 0 0 1 -7,7 h-16 a7,7 0 0 1 -7,-7 v-10 a7,7 0 0 1 7,-7 z" fill="#F4F1EA"/>
+  <path d="M25.6,21.6 L21.4,28 L24.1,28 L22.4,32.4 L26.6,26 L23.9,26 Z" fill="#17181C"/>
+</svg>

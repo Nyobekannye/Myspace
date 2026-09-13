@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">@color/surface</item>
+        <item name="android:colorPrimaryDark">@color/bg</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/text2</item>
+        <item name="android:textColorHint">@color/text3</item>
+        <item name="android:colorControlNormal">@color/text2</item>
+        <item name="android:colorControlActivated">@color/accent</item>
+        <item name="android:colorControlHighlight">@color/ripple</item>
+        <item name="android:alertDialogTheme">@style/DialogTheme</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnim</item>
+    </style>
+    <style name="WindowAnim" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_up</item>
+        <item name="android:activityOpenExitAnimation">@anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_down</item>
+    </style>
+    <style name="DarkTheme" parent="AppTheme" />
+
+    <style name="DialogTheme" parent="@android:style/Theme.Material.Dialog.Alert">
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/text2</item>
+        <item name="android:colorControlHighlight">@color/ripple</item>
+    </style>
+
+    <style name="SheetTheme" parent="@android:style/Theme.Material.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@style/SheetAnim</item>
+        <item name="android:colorControlHighlight">@color/ripple</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+    </style>
+    <style name="TabsTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:windowAnimationStyle">@style/TabsAnim</item>
+        <item name="android:colorControlHighlight">@color/ripple</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:alertDialogTheme">@style/DialogTheme</item>
+    </style>
+    <style name="TabsAnim">
+        <item name="android:windowEnterAnimation">@anim/slide_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_down</item>
+    </style>
+    <style name="SheetAnim">
+        <item name="android:windowEnterAnimation">@anim/sheet_in</item>
+        <item name="android:windowExitAnimation">@anim/sheet_out</item>
+    </style>
+
+    <style name="NavBtn">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:tint">@color/on_ink</item>
+        <item name="android:background">@drawable/bg_circle_ripple_ink</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+    <style name="IconBtn">
+        <item name="android:layout_width">44dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:padding">11dp</item>
+        <item name="android:tint">@color/text</item>
+        <item name="android:background">@drawable/bg_icon_btn</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+</resources>

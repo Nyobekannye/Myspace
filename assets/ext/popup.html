@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <title>Sesi MAX MODE</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <main class="app">
+        <!-- iOS 17 large-title header -->
+        <header class="hdr">
+            <img src="brand-icon.svg" class="logo" alt="">
+            <div class="hdr-copy">
+                <h1>Sesi</h1>
+                <span class="sub">MAX MODE <span class="dot">·</span> v2.11 <span class="dot">·</span> by Whempy &amp; Dhon</span>
+            </div>
+            <span class="status" id="status-pill" data-state="idle"><i class="led" aria-hidden="true"></i><span id="status-text">…</span></span>
+        </header>
+
+        <!-- MAX MODE quick toggles -->
+        <section class="max-banner" aria-label="MAX MODE">
+            <div class="max-row">
+                <div class="max-led" id="led-single" aria-hidden="true"></div>
+                <div class="max-copy">
+                    <b>Paksa 1 video × 30s</b>
+                    <span>Satu klip 30 detik utuh, Seedance 2.5 — bukan 2 video</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="sw-single-clip" checked>
+                    <span class="knob"></span>
+                </label>
+            </div>
+            <div class="max-row">
+                <div class="max-led" id="led-anime" aria-hidden="true"></div>
+                <div class="max-copy">
+                    <b>Referensi = animasi</b>
+                    <span>Paksa Dola anggap foto referensi sebagai karakter animasi, bukan wajah asli</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="sw-anime-ref" checked>
+                    <span class="knob"></span>
+                </label>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="counts" aria-label="Counters">
+            <div><b id="n-found">0</b><span>Found</span></div>
+            <div><b id="n-saved">0</b><span>Saved</span></div>
+        </section>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn primary" id="btn-scan" type="button" disabled>Scan chat</button>
+            <button class="btn" id="btn-open-dola" type="button">Open Dola</button>
+        </div>
+        <p class="hint" id="hint"></p>
+
+        <!-- Video yang ditemukan: unduh satu per satu -->
+        <h2 class="group-title" id="vid-title">Video siap download</h2>
+        <section class="group vid-list" id="vid-list" aria-label="Videos"></section>
+
+        <!-- Settings (iOS grouped inset list) -->
+        <h2 class="group-title">Settings</h2>
+        <section class="group" aria-label="Settings">
+            <div class="row">
+                <div class="row-icon dl" aria-hidden="true">⬇︎</div>
+                <div class="row-copy">
+                    <span class="row-title">Auto-download</span>
+                    <span class="row-sub">Save new videos automatically</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="sw-auto-dl">
+                    <span class="knob"></span>
+                </label>
+            </div>
+            <div class="row">
+                <div class="row-icon hd" aria-hidden="true">⚡</div>
+                <div class="row-copy">
+                    <span class="row-title">Mode Ganas</span>
+                    <span class="row-sub">Pilih Seedance 2.5 + durasi ASLI maks di menu Dola, inject prompt, auto-jawab</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="sw-aggressive" checked>
+                    <span class="knob"></span>
+                </label>
+            </div>
+            <div class="row">
+                <div class="row-icon time" aria-hidden="true">2.5</div>
+                <div class="row-copy">
+                    <span class="row-title">Kunci model Seedance 2.5</span>
+                    <span class="row-sub">Paksa 1.0/2.0 → 2.5 di payload & tolak kartu downgrade server</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="sw-force-25" checked>
+                    <span class="knob"></span>
+                </label>
+            </div>
+            <div class="row">
+                <div class="row-icon time" aria-hidden="true">2→</div>
+                <div class="row-copy">
+                    <span class="row-title">Auto-terima 2×15s</span>
+                    <span class="row-sub">Jika Dola tetap menolak 30s, jawab "Ya" otomatis (hemat kredit, tanpa loop)</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="sw-accept-split">
+                    <span class="knob"></span>
+                </label>
+            </div>
+            <div class="row">
+                <div class="row-icon time" aria-hidden="true">◔</div>
+                <div class="row-copy"><span class="row-title">Duration</span></div>
+                <span class="row-value">30s (1 clip)</span>
+            </div>
+            <div class="row">
+                <div class="row-icon hd" aria-hidden="true">HD</div>
+                <div class="row-copy"><span class="row-title">Quality</span></div>
+                <span class="row-value">Max HD</span>
+            </div>
+            <div class="row">
+                <div class="row-icon wm" aria-hidden="true">◌</div>
+                <div class="row-copy"><span class="row-title">Watermark</span></div>
+                <span class="row-value">Off</span>
+            </div>
+        </section>
+        <p class="group-foot">Saat Auto-download mati, video dikumpulkan di latar — ketuk <b>Scan chat</b> lalu pilih video yang mau disimpan dari daftar di atas.</p>
+
+        <!-- Saved accounts (local-only autofill for Google login) -->
+        <h2 class="group-title">Akun Tersimpan</h2>
+        <section class="group" id="acc-list" aria-label="Saved accounts"></section>
+        <div class="acc-add">
+            <div class="acc-field"><input id="acc-email" type="email" placeholder="Email" autocomplete="off"></div>
+            <div class="acc-field">
+                <input id="acc-password" type="password" placeholder="Password" autocomplete="off">
+                <button class="acc-eye" id="acc-toggle-pw" type="button" title="Tampilkan/sembunyikan">👁</button>
+            </div>
+            <div class="acc-field"><input id="acc-label" type="text" placeholder="Label (opsional)" autocomplete="off"></div>
+            <button class="btn primary" id="acc-save" type="button">+ Simpan akun</button>
+        </div>
+        <p class="group-foot">Password dienkripsi &amp; disimpan lokal di HP ini (Android Keystore) — tidak pernah dikirim ke server. Klik <b>Isi ke Google</b> saat halaman login Google terbuka.</p>
+
+        <h2 class="group-title">Debug</h2>
+        <section class="group" aria-label="Debug">
+            <div class="row">
+                <div class="row-icon dl" aria-hidden="true">🐞</div>
+                <div class="row-copy">
+                    <span class="row-title">Kirim log debug</span>
+                    <span class="row-sub">Kalau ada yang tidak jalan, kirim log ini ke Whempy &amp; Dhon</span>
+                </div>
+                <button class="btn" id="btn-share-log" type="button">Kirim</button>
+            </div>
+        </section>
+
+        <footer class="foot">
+            <span>Made by <b>Whempy &amp; Dhon</b></span>
+            <a href="https://wa.me/628889841098" target="_blank" rel="noopener noreferrer">WhatsApp ›</a>
+        </footer>
+    </main>
+    <script src="../chrome-shim-popup.js"></script>
+    <script src="popup.js"></script>
+    <script src="accounts-ui.js"></script>
+</body>
+</html>

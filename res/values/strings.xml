@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sesi Browser</string>
+    <string name="hint_url">Cari atau ketik URL</string>
+    <string name="your_sessions">Sesi kamu</string>
+    <string name="new_session">Baru</string>
+</resources>
