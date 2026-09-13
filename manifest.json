@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Dola HD Downloader — Axiom",
   "version": "1.0.0",
-  "description": "Mengunduh video Dola milik pengguna pada kualitas tertinggi yang tersedia dan menyembunyikan kontrol filter wajah.",
+  "description": "Mengunduh video Dola milik pengguna pada kualitas tertinggi yang tersedia, menyembunyikan kontrol filter wajah, dan menetralkan parameter wajah pada permintaan API.",
   "permissions": ["downloads", "storage"],
   "host_permissions": [
     "https://dola.com/*",
@@ -27,7 +27,7 @@
     },
     {
       "matches": ["https://dola.com/*", "https://www.dola.com/*"],
-      "js": ["src/page-bridge.js"],
+      "js": ["src/media-utils.js", "src/page-bridge.js"],
       "run_at": "document_start",
       "world": "MAIN"
     }

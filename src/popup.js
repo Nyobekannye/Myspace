@@ -1,9 +1,15 @@
-const toggle = document.querySelector("#hide-face");
+const hideToggle = document.querySelector("#hide-face");
+const bypassToggle = document.querySelector("#bypass-face");
 
-chrome.storage.sync.get({ hideFaceControls: true }, settings => {
-  toggle.checked = settings.hideFaceControls;
+chrome.storage.sync.get({ hideFaceControls: true, bypassFaceFilter: true }, settings => {
+  hideToggle.checked = settings.hideFaceControls;
+  bypassToggle.checked = settings.bypassFaceFilter;
 });
 
-toggle.addEventListener("change", () => {
-  chrome.storage.sync.set({ hideFaceControls: toggle.checked });
+hideToggle.addEventListener("change", () => {
+  chrome.storage.sync.set({ hideFaceControls: hideToggle.checked });
+});
+
+bypassToggle.addEventListener("change", () => {
+  chrome.storage.sync.set({ bypassFaceFilter: bypassToggle.checked });
 });

@@ -5,10 +5,23 @@
   const media = new Map();
   const FACE_TERMS = /(?:face\s*(?:filter|swap|beauty|retouch|effect)|portrait(?:\s*(?:filter|effect))?|beautify|retouch|filter\s*wajah|tukar\s*wajah|wajah)/i;
   const CONTROL_SELECTOR = "button, a, label, [role='button'], [role='menuitem'], [role='option'], [data-testid], [data-e2e]";
+  const BYPASS_MESSAGE = "AXIOM_DOLA_FACE_BYPASS";
+  const EXTENSION_SOURCE = "axiom-dola-ext";
   let hideFaceControls = true;
+  let bypassFaceFilter = true;
   let panel;
   let status;
+  let bypassState;
   let policyFrame;
+
+  function broadcastFaceBypass() {
+    try {
+      window.postMessage(
+        { source: EXTENSION_SOURCE, type: BYPASS_MESSAGE, enabled: bypassFaceFilter },
+        location.origin
+      );
+    } catch {}
+  }
 
   function addCandidate(candidate) {
     const url = utils.normalizeUrl(candidate && candidate.url, location.href);
@@ -82,10 +95,22 @@
       <strong>Dola HD</strong>
       <button type="button" id="axiom-dola-download">Download HD</button>
       <span id="axiom-dola-status">Menunggu video…</span>
+      <span id="axiom-dola-bypass"></span>
     `;
     document.documentElement.appendChild(panel);
     status = panel.querySelector("#axiom-dola-status");
+    bypassState = panel.querySelector("#axiom-dola-bypass");
+    renderBypassState();
     panel.querySelector("#axiom-dola-download").addEventListener("click", downloadBest);
+  }
+
+  function renderBypassState() {
+    if (bypassState && bypassFaceFilter) {
+      bypassState.textContent = "Bypass filter wajah: AKTIF";
+      bypassState.style.color = "#82f5b5";
+    } else if (bypassState) {
+      bypassState.textContent = "";
+    }
   }
 
   window.addEventListener("axiom-dola-media", event => addCandidate(event.detail));
@@ -98,14 +123,23 @@
     }
   }, true);
 
-  chrome.storage.sync.get({ hideFaceControls: true }, settings => {
+  chrome.storage.sync.get({ hideFaceControls: true, bypassFaceFilter: true }, settings => {
     hideFaceControls = settings.hideFaceControls;
+    bypassFaceFilter = settings.bypassFaceFilter;
+    broadcastFaceBypass();
     applyFaceControlPolicy();
+    renderBypassState();
   });
   chrome.storage.onChanged.addListener(changes => {
-    if (!changes.hideFaceControls) return;
-    hideFaceControls = changes.hideFaceControls.newValue;
-    applyFaceControlPolicy();
+    if (changes.hideFaceControls) {
+      hideFaceControls = changes.hideFaceControls.newValue;
+      applyFaceControlPolicy();
+    }
+    if (changes.bypassFaceFilter) {
+      bypassFaceFilter = changes.bypassFaceFilter.newValue;
+      broadcastFaceBypass();
+      renderBypassState();
+    }
   });
 
   const observer = new MutationObserver(records => {

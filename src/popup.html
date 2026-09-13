@@ -8,12 +8,15 @@
       body { width: 260px; margin: 0; padding: 16px; color: #eef1f5; background: #121318; font: 13px/1.45 system-ui, sans-serif; }
       h1 { margin: 0 0 12px; font-size: 17px; }
       label { display: flex; gap: 9px; align-items: center; padding: 10px; border-radius: 10px; background: #202229; }
+      label + label { margin-top: 8px; }
       p { margin: 12px 2px 0; color: #aeb4c0; font-size: 11px; }
     </style>
   </head>
   <body>
     <h1>Dola HD Downloader</h1>
     <label><input id="hide-face" type="checkbox"> Sembunyikan filter wajah</label>
+    <label><input id="bypass-face" type="checkbox"> Bypass filter wajah</label>
+    <p>Bypass menetralkan parameter wajah pada permintaan API Dola agar video hasil generasi tidak menerapkan filter wajah.</p>
     <p>Buka video Dola, putar videonya, lalu gunakan tombol Download HD di kanan bawah halaman.</p>
     <script src="popup.js"></script>
   </body>

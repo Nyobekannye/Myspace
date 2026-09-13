@@ -7,6 +7,7 @@
 
   const MEDIA_EXTENSION = /\.(?:mp4|webm|mov|m3u8)(?:$|[?#])/i;
   const MEDIA_KEY = /(?:play|download|video|media|main|backup|origin|source).*(?:url|uri)|(?:url|uri)/i;
+  const FACE_PARAM_TERMS = /(?:face\s*(?:filter|swap|effect)|faceswap|face_swap|face_filter|facefilter|portrait|beautify|beauty|retouch|filter\s*wajah|tukar\s*wajah|\bwajah\b|\bface\b)/i;
   const ALLOWED_HOST_SUFFIXES = [
     "dola.com",
     "ciciai.com",
@@ -94,12 +95,51 @@
     return `${clean || "dola-video-hd"}.mp4`;
   }
 
+  function stripFaceFilterParams(value, depth = 0) {
+    if (depth > 20) return { changed: false, value };
+    if (Array.isArray(value)) {
+      let changed = false;
+      const next = value.map(item => {
+        const result = stripFaceFilterParams(item, depth + 1);
+        changed = changed || result.changed;
+        return result.value;
+      });
+      return changed ? { changed, value: next } : { changed: false, value };
+    }
+    if (value && typeof value === "object") {
+      let changed = false;
+      const next = {};
+      for (const [key, item] of Object.entries(value)) {
+        if (FACE_PARAM_TERMS.test(key)) {
+          changed = true;
+          continue;
+        }
+        const result = stripFaceFilterParams(item, depth + 1);
+        if (result.changed) changed = true;
+        next[key] = result.value;
+      }
+      return changed ? { changed, value: next } : { changed: false, value };
+    }
+    return { changed: false, value };
+  }
+
+  function isDolaHostUrl(value, baseUrl) {
+    if (typeof value !== "string") return false;
+    try {
+      return /(^|\.)dola\.com$/i.test(new URL(value.replaceAll("\\u0026", "&"), baseUrl).hostname);
+    } catch {
+      return false;
+    }
+  }
+
   return {
     candidateScore,
     chooseBestCandidate,
     extractMediaCandidates,
     isAllowedMediaUrl,
+    isDolaHostUrl,
     normalizeUrl,
     safeFilename,
+    stripFaceFilterParams,
   };
 });
