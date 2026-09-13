@@ -1,0 +1,26 @@
+{
+  "name": "telegram-auto-order-bot",
+  "version": "1.0.0",
+  "description": "Bot Telegram auto order: katalog, keranjang, checkout, notifikasi admin",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test",
+    "start": "node --env-file=.env src/index.js",
+    "dev": "node --env-file=.env --watch src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nyobekannye/Myspace.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Nyobekannye/Myspace/issues"
+  },
+  "homepage": "https://github.com/Nyobekannye/Myspace#readme",
+  "dependencies": {
+    "grammy": "^1.46.0"
+  }
+}
