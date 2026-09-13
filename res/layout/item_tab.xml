@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tabCard"
+    android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    android:orientation="vertical"
+    android:background="@drawable/bg_tab_card"
+    android:clipToOutline="true"
+    android:padding="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="10dp"
+        android:paddingEnd="2dp">
+        <ImageView
+            android:id="@+id/tabIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_globe"
+            android:tint="@color/text2" />
+        <TextView
+            android:id="@+id/tabTitle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textSize="12sp"
+            android:textColor="@color/text" />
+        <ImageView
+            android:id="@+id/tabClose"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_close"
+            android:tint="@color/text2"
+            android:background="@drawable/bg_circle_ripple"
+            android:contentDescription="Tutup tab" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/tabThumb"
+            android:layout_width="match_parent"
+            android:layout_height="190dp"
+            android:scaleType="matrix"
+            android:background="@drawable/bg_thumb" />
+        <TextView
+            android:id="@+id/tabHost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:textSize="10sp"
+            android:textColor="#FFFFFF"
+            android:background="#CC0F0F12" />
+    </FrameLayout>
+</LinearLayout>

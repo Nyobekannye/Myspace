@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Palet "Soft Dark": arang lembut, flat, tanpa gradien / kaca -->
+    <color name="bg">#1E1F24</color>          <!-- arang lembut: latar -->
+    <color name="surface">#2A2B32</color>     <!-- kartu & sheet -->
+    <color name="surface2">#34353D</color>    <!-- pil/input di atas kartu -->
+    <color name="surface3">#3A3B44</color>
+    <color name="surface4">#44454F</color>
+    <color name="stroke">#1AFFFFFF</color>
+    <color name="stroke2">#2EFFFFFF</color>
+    <color name="card">#FFFFFF</color>
+    <color name="ink">#0F0F12</color>         <!-- pil nav: hitam lembut -->
+    <color name="ink2">#1C1D22</color>
+    <color name="on_ink">#F2F2F0</color>      <!-- krem: teks/ikon di pil hitam, tombol utama -->
+    <color name="cream">#EEF0EA</color>
+    <color name="text">#F2F2F0</color>
+    <color name="text2">#A3A5AC</color>
+    <color name="text3">#6F717A</color>
+    <color name="accent">#B3A3E0</color>      <!-- lavender -->
+    <color name="accent_soft">#6E62A0</color>
+    <color name="accent2">#E7B4CB</color>
+    <color name="accent3">#F0D3A8</color>
+    <color name="danger">#E0655C</color>
+    <color name="ok">#6FB37F</color>
+    <color name="ic_bg">#17181C</color>
+    <color name="web_dark">#0E0E12</color>
+    <color name="ripple">#1FFFFFFF</color>
+    <color name="ripple_ink">#33FFFFFF</color>
+    <color name="ripple_dark">#22000000</color>
+</resources>
