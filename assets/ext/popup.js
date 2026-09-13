@@ -1,5 +1,5 @@
 /**
- * Sesi MAX MODE v2.7 by Whempy & Dhon — iOS 17 style popup.
+ * Sesi MAX MODE v2.8 by Whempy & Dhon — iOS 17 style popup.
  * 30s · Max HD · no watermark are locked. Auto-download is a user setting (default OFF,
  * toggle in Settings). The UI shows status, a Scan button and a per-video download list for the most recent Dola tab.
  * Works as a side panel (desktop) and as a standalone tab (Kiwi & other mobile browsers).
@@ -146,6 +146,25 @@
     const swSplit = $('sw-accept-split');
     const swForce25 = $('sw-force-25');
     const swAnime = $('sw-anime-ref');
+    // ---- Mode: Chat biasa (semua paksaan pasif) vs Buat video (MAX MODE) ----
+    const modeChat = $('mode-chat'), modeVideo = $('mode-video'), modeFoot = $('mode-foot'), banner = $('max-banner');
+    const renderMode = (mode) => {
+        const chat = mode === 'chat';
+        modeChat.setAttribute('aria-checked', chat ? 'true' : 'false');
+        modeVideo.setAttribute('aria-checked', chat ? 'false' : 'true');
+        banner.classList.toggle('dimmed', chat);
+        modeFoot.innerHTML = chat
+            ? 'Mode <b>Chat biasa</b>: Dola dipakai apa adanya — tanpa paksaan 1×30s, tanpa ubah model/durasi, tanpa catatan referensi animasi, tanpa auto-jawab.'
+            : 'Mode <b>Buat video</b>: paksaan 1×30s, Seedance 2.5 &amp; referensi animasi aktif sesuai toggle di bawah.';
+    };
+    const setMode = (mode) => {
+        renderMode(mode);
+        chrome.storage.local.set({ dolaMode: mode }, () => void chrome.runtime.lastError);
+        setHint(mode === 'chat' ? 'Chat biasa aktif — MAX MODE dijeda, Dola berperilaku normal.' : 'Buat video aktif — MAX MODE jalan lagi.', 'ok');
+    };
+    chrome.storage.local.get(['dolaMode'], res => { void chrome.runtime.lastError; renderMode(res?.dolaMode === 'chat' ? 'chat' : 'video'); });
+    modeChat.addEventListener('click', () => setMode('chat'));
+    modeVideo.addEventListener('click', () => setMode('video'));
     const leds = () => { $('led-single').classList.toggle('off', !swSingle.checked); $('led-anime').classList.toggle('off', !swAnime.checked); };
     chrome.storage.local.get(['singleClip', 'aggressiveMode', 'autoAcceptSplit', 'forceModel25', 'animeRef'], res => {
         void chrome.runtime.lastError;
@@ -185,6 +204,7 @@
         if (changes.autoAcceptSplit) swSplit.checked = changes.autoAcceptSplit.newValue === true;
         if (changes.forceModel25) swForce25.checked = changes.forceModel25.newValue !== false;
         if (changes.animeRef) swAnime.checked = changes.animeRef.newValue !== false;
+        if (changes.dolaMode) renderMode(changes.dolaMode.newValue === 'chat' ? 'chat' : 'video');
         leds();
     });
 

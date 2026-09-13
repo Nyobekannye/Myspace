@@ -27,15 +27,20 @@
 
   const TAG = '[Whempy 1×30s]';
   const cfg = {
-    enabled: true,          // master switch (singleClip)
-    aggressive: true,       // L2 + L3 + L4 (aggressiveMode)
     duration: 30,
     promptInject: true,
     autoReply: true,
     autoAcceptSplit: false, // when Dola can only do 2×15s: auto-answer "Ya" instead of looping
     forceModel25: true,     // rewrite variables.model → Seedance 2.5 id (learned), decline server downgrade cards
-    animeRef: true          // reference image = animated character (never a real face): prompt note + auto-answer refusals
+    chatMode: false         // "Chat biasa": every layer below goes fully passive so Dola behaves like stock
   };
+  // Raw user switches; the public getters fold chatMode in so every gate in this file honours it.
+  const raw = { enabled: true, aggressive: true, animeRef: true };
+  Object.defineProperties(cfg, {
+    enabled:    { get: () => !cfg.chatMode && raw.enabled,    set: (v) => { raw.enabled = !!v; },    enumerable: true },
+    aggressive: { get: () => !cfg.chatMode && raw.aggressive, set: (v) => { raw.aggressive = !!v; }, enumerable: true },
+    animeRef:   { get: () => !cfg.chatMode && raw.animeRef,   set: (v) => { raw.animeRef = !!v; },   enumerable: true }
+  });
   // L0 chat hook must stay armed while either feature is on
   const active = () => cfg.enabled || cfg.animeRef;
 
@@ -55,6 +60,7 @@
     if (obj.autoAcceptSplit !== undefined) cfg.autoAcceptSplit = obj.autoAcceptSplit === true;
     if (obj.forceModel25 !== undefined) cfg.forceModel25 = obj.forceModel25 !== false;
     if (obj.animeRef !== undefined) cfg.animeRef = obj.animeRef !== false;
+    if (obj.dolaMode !== undefined) cfg.chatMode = obj.dolaMode === 'chat';
     if (obj.durationOverride || obj.duration) {
       const d = parseInt(obj.durationOverride || obj.duration, 10);
       if (d > 0) cfg.duration = d;
@@ -63,7 +69,7 @@
   try {
     const st = globalThis.chrome && chrome.storage && chrome.storage.local;
     if (st) {
-      st.get(['singleClip', 'aggressiveMode', 'promptInject', 'autoReply', 'durationOverride', 'autoAcceptSplit', 'forceModel25', 'animeRef'], (res) => {
+      st.get(['singleClip', 'aggressiveMode', 'promptInject', 'autoReply', 'durationOverride', 'autoAcceptSplit', 'forceModel25', 'animeRef', 'dolaMode'], (res) => {
         try { void chrome.runtime.lastError; } catch (e) {}
         applySettings(res || {});
         log('settings loaded: ' + JSON.stringify(cfg));
@@ -73,7 +79,7 @@
         const flat = {};
         Object.keys(changes || {}).forEach(k => { flat[k] = changes[k] && changes[k].newValue; });
         applySettings(flat);
-        toast('settings updated → ' + (cfg.enabled ? '1 video × ' + cfg.duration + 's' : 'OFF') + (cfg.aggressive ? ' (AGGRESSIVE)' : '') + (cfg.animeRef ? ' · ref=animasi' : ''));
+        toast('settings updated → ' + (cfg.chatMode ? '💬 CHAT BIASA (semua paksaan nonaktif)' : (cfg.enabled ? '1 video × ' + cfg.duration + 's' : 'OFF') + (cfg.aggressive ? ' (AGGRESSIVE)' : '') + (cfg.animeRef ? ' · ref=animasi' : '')));
       });
     }
   } catch (e) {}

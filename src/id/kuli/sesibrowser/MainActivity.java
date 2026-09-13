@@ -1699,7 +1699,7 @@ public class MainActivity extends Activity {
         ((FrameLayout) findViewById(R.id.root)).addView(bgWeb, 0, new FrameLayout.LayoutParams(1, 1));
 
         maxFab = new ImageView(this);
-        maxFab.setImageResource(R.drawable.ic_maxmode);
+        maxFab.setImageResource(R.drawable.ic_logo);
         maxFab.setScaleType(ImageView.ScaleType.FIT_CENTER);
         maxFab.setElevation(Ui.dp(this, 4));
         maxFab.setOutlineProvider(android.view.ViewOutlineProvider.BACKGROUND);

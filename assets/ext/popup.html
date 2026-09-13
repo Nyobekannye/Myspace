@@ -14,13 +14,20 @@
             <img src="brand-icon.svg" class="logo" alt="">
             <div class="hdr-copy">
                 <h1>Sesi</h1>
-                <span class="sub">MAX MODE <span class="dot">·</span> v2.7 <span class="dot">·</span> by Whempy &amp; Dhon</span>
+                <span class="sub">MAX MODE <span class="dot">·</span> v2.8 <span class="dot">·</span> by Whempy &amp; Dhon</span>
             </div>
             <span class="status" id="status-pill" data-state="idle"><i class="led" aria-hidden="true"></i><span id="status-text">…</span></span>
         </header>
 
+        <!-- Mode: Chat biasa vs Buat video -->
+        <section class="mode-seg" role="radiogroup" aria-label="Mode Dola">
+            <button type="button" class="seg" id="mode-chat" data-mode="chat" role="radio" aria-checked="false">💬 Chat biasa</button>
+            <button type="button" class="seg" id="mode-video" data-mode="video" role="radio" aria-checked="true">🎬 Buat video</button>
+        </section>
+        <p class="mode-foot" id="mode-foot">Mode <b>Buat video</b>: paksaan 1×30s, Seedance 2.5 &amp; referensi animasi aktif sesuai toggle di bawah.</p>
+
         <!-- MAX MODE quick toggles -->
-        <section class="max-banner" aria-label="MAX MODE">
+        <section class="max-banner" id="max-banner" aria-label="MAX MODE">
             <div class="max-row">
                 <div class="max-led" id="led-single" aria-hidden="true"></div>
                 <div class="max-copy">
