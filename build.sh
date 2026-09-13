@@ -12,7 +12,7 @@ rm -rf build && mkdir -p build/gen build/classes build/dex
 $BT/aapt2 compile --dir res -o build/res.zip || exit 1
 $BT/aapt2 link -o build/base.apk -I $AJ --manifest AndroidManifest.xml -A assets \
   --java build/gen --min-sdk-version 28 --target-sdk-version 34 \
-  --version-code 37 --version-name 7.2.1 build/res.zip || exit 1
+  --version-code 38 --version-name 7.2.2 build/res.zip || exit 1
 
 javac -encoding UTF-8 --release 11 -Xlint:-options -nowarn -classpath "$AJ:$LIBS" -d build/classes \
   $(find build/gen src -name "*.java") || exit 1

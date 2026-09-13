@@ -1,5 +1,5 @@
 /**
- * Sesi MAX MODE v2.9 by Whempy & Dhon — iOS 17 style popup.
+ * Sesi MAX MODE v2.10 by Whempy & Dhon — iOS 17 style popup.
  * 30s · Max HD · no watermark are locked. Auto-download is a user setting (default OFF,
  * toggle in Settings). The UI shows status, a Scan button and a per-video download list for the most recent Dola tab.
  * Works as a side panel (desktop) and as a standalone tab (Kiwi & other mobile browsers).

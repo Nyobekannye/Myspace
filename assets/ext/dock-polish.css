@@ -12,7 +12,8 @@
     [id^="channa-"][id*="dock"],
     [class*="channa-"][class*="dock"],
     #channa-inpage-toast,
-    #channa-tab-session-badge
+    #channa-tab-session-badge,
+    #sesi-maxmode-pill
 ) {
     box-sizing: border-box !important;
     color: #f4f4f5 !important;
@@ -145,7 +146,7 @@
     backdrop-filter: blur(14px) !important;
 }
 
-#channa-tab-session-badge.studio-relay-session-badge {
+#sesi-maxmode-pill.studio-relay-session-badge {
     display: inline-flex !important;
     position: fixed !important;
     top: 10px !important;
@@ -178,12 +179,15 @@
     white-space: nowrap !important;
     z-index: 2147483646 !important;
 }
-#channa-tab-session-badge.studio-relay-session-badge::before {
+#sesi-maxmode-pill.studio-relay-session-badge::before {
     content: none !important;
 }
 
+/* Legacy "Container: Default [30s HD • Off-Peak …]" status badge from the old script: hidden for good */
+#channa-tab-session-badge { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+
 /* Mode button: 🎬 buat video / 💬 chat biasa */
-#channa-tab-session-badge .ids-mode {
+#sesi-maxmode-pill .ids-mode {
     display: inline-flex !important; align-items: center !important; justify-content: center !important;
     width: 30px !important; height: 28px !important; flex: 0 0 30px !important;
     border-radius: 999px !important; font-size: 15px !important; line-height: 1 !important;
@@ -191,12 +195,12 @@
     background: rgba(255, 255, 255, 0.08) !important; outline: none !important;
     transition: background 160ms ease, transform 160ms cubic-bezier(.2,.8,.2,1) !important;
 }
-#channa-tab-session-badge .ids-mode:active { transform: scale(0.94) !important; }
-#channa-tab-session-badge.chat-mode .ids-mode { background: rgba(10, 132, 255, 0.35) !important; }
-#channa-tab-session-badge .ids-toggle.disabled { opacity: 0.45 !important; cursor: not-allowed !important; }
+#sesi-maxmode-pill .ids-mode:active { transform: scale(0.94) !important; }
+#sesi-maxmode-pill.chat-mode .ids-mode { background: rgba(10, 132, 255, 0.35) !important; }
+#sesi-maxmode-pill .ids-toggle.disabled { opacity: 0.45 !important; cursor: not-allowed !important; }
 
 /* One toggle "chip": LED · label · mini switch */
-#channa-tab-session-badge .ids-toggle {
+#sesi-maxmode-pill .ids-toggle {
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
@@ -208,13 +212,13 @@
     transition: background 160ms ease, transform 160ms cubic-bezier(.2,.8,.2,1) !important;
     outline: none !important;
 }
-#channa-tab-session-badge .ids-toggle:active { transform: scale(0.96) !important; }
-#channa-tab-session-badge .ids-toggle.on { background: rgba(255, 255, 255, 0.08) !important; }
-#channa-tab-session-badge .ids-toggle + .ids-toggle { border-left: 0.5px solid rgba(255, 255, 255, 0.12) !important; border-radius: 0 999px 999px 0 !important; }
-#channa-tab-session-badge .ids-mode + .ids-toggle { border-radius: 999px 0 0 999px !important; }
+#sesi-maxmode-pill .ids-toggle:active { transform: scale(0.96) !important; }
+#sesi-maxmode-pill .ids-toggle.on { background: rgba(255, 255, 255, 0.08) !important; }
+#sesi-maxmode-pill .ids-toggle + .ids-toggle { border-left: 0.5px solid rgba(255, 255, 255, 0.12) !important; border-radius: 0 999px 999px 0 !important; }
+#sesi-maxmode-pill .ids-mode + .ids-toggle { border-radius: 999px 0 0 999px !important; }
 
 /* LED — green pulse when ON, grey when OFF */
-#channa-tab-session-badge .ids-led {
+#sesi-maxmode-pill .ids-led {
     display: inline-block !important;
     width: 8px !important;
     height: 8px !important;
@@ -224,7 +228,7 @@
     box-shadow: none !important;
     transition: background 160ms ease, box-shadow 160ms ease !important;
 }
-#channa-tab-session-badge .ids-toggle.on .ids-led {
+#sesi-maxmode-pill .ids-toggle.on .ids-led {
     background: radial-gradient(circle at 35% 35%, #8bffa9, #30d158 60%, #1f9a3f) !important;
     box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.22), 0 0 12px rgba(48, 209, 88, 0.95) !important;
     animation: ids-led-pulse 1.8s ease-in-out infinite !important;
@@ -234,14 +238,14 @@
     50% { opacity: 0.78; }
 }
 
-#channa-tab-session-badge .ids-label {
+#sesi-maxmode-pill .ids-label {
     color: rgba(255, 255, 255, 0.72) !important;
     font-weight: 600 !important;
 }
-#channa-tab-session-badge .ids-toggle.on .ids-label { color: #ffffff !important; }
+#sesi-maxmode-pill .ids-toggle.on .ids-label { color: #ffffff !important; }
 
 /* Mini iOS switch */
-#channa-tab-session-badge .ids-switch {
+#sesi-maxmode-pill .ids-switch {
     position: relative !important;
     display: inline-block !important;
     width: 34px !important;
@@ -252,8 +256,8 @@
     box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.08) !important;
     transition: background 180ms ease !important;
 }
-#channa-tab-session-badge .ids-toggle.on .ids-switch { background: #30d158 !important; }
-#channa-tab-session-badge .ids-switch::after {
+#sesi-maxmode-pill .ids-toggle.on .ids-switch { background: #30d158 !important; }
+#sesi-maxmode-pill .ids-switch::after {
     content: "" !important;
     position: absolute !important;
     top: 2px !important;
@@ -265,7 +269,7 @@
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06) !important;
     transition: transform 180ms cubic-bezier(.2,.8,.2,1) !important;
 }
-#channa-tab-session-badge .ids-toggle.on .ids-switch::after { transform: translateX(14px) !important; }
+#sesi-maxmode-pill .ids-toggle.on .ids-switch::after { transform: translateX(14px) !important; }
 
 /* =========================================================
    Whempy — minimal Bulk ZIP dock (bottom-right)
@@ -568,7 +572,7 @@
 @media (prefers-reduced-motion: reduce) {
     :where([id^="channa-dock-"], [id^="channa-seq-"], [id^="channa-"][id*="dock"], [class*="channa-"][class*="dock"]) *,
     #channa-inpage-toast,
-    #channa-tab-session-badge {
+    #sesi-maxmode-pill {
         animation: none !important;
         scroll-behavior: auto !important;
         transition-duration: 0.01ms !important;

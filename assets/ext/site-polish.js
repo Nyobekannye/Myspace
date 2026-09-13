@@ -1,7 +1,10 @@
 (function () {
     'use strict';
 
-    const SESSION_BADGE_ID = 'channa-tab-session-badge';
+    // Legacy ChannaTheBrand badge ("Container: Default [30s HD • Off-Peak …]") — purely cosmetic status text from
+    // the old script, re-written by it every second. We hide it (CSS) and render our own pill instead.
+    const LEGACY_BADGE_ID = 'channa-tab-session-badge';
+    const SESSION_BADGE_ID = 'sesi-maxmode-pill';
     const SESSION_BADGE_TEXT = 'MAX MODE active';
     const MODE_LABEL_TEXT = '30s (MAX MODE)';
     const LEGACY_MODE_PATTERN = /^\s*(\d+)\s*s\s*\(\s*bypassed\s*\)\s*$/i;
@@ -73,8 +76,15 @@
     }
 
     function polishSessionBadge() {
-        const badge = document.getElementById(SESSION_BADGE_ID);
-        if (!badge) return;
+        const legacy = document.getElementById(LEGACY_BADGE_ID);
+        if (legacy && legacy.style.display !== 'none') { legacy.style.setProperty('display', 'none', 'important'); legacy.setAttribute('aria-hidden', 'true'); }
+        if (!document.body) return;
+        let badge = document.getElementById(SESSION_BADGE_ID);
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = SESSION_BADGE_ID;
+            document.body.appendChild(badge);
+        } else if (badge.parentElement !== document.body) document.body.appendChild(badge);   // SPA re-render moved it
         badge.classList.add('studio-relay-session-badge');
         badge.setAttribute('aria-label', 'Sesi MAX MODE — 1×30s & Referensi animasi');
         badge.setAttribute('title', 'Sesi MAX MODE by Whempy & Dhon');
@@ -296,7 +306,7 @@
                 if (mutation.type === 'characterData') { pendingText.add(mutation.target); continue; }
                 if (mutation.target && mutation.target.id === SESSION_BADGE_ID) continue;   // our own pill
                 for (const node of mutation.addedNodes) {
-                    if (node.nodeType === 1 && node.id === SESSION_BADGE_ID) { badgeDirty = true; continue; }
+                    if (node.nodeType === 1 && (node.id === SESSION_BADGE_ID || node.id === LEGACY_BADGE_ID)) { badgeDirty = true; continue; }
                     if (node.nodeType === 1 || node.nodeType === 3) pendingNodes.add(node);
                 }
             }
@@ -460,7 +470,7 @@
         const captureClick = (event) => {
             if (!isClickSyncArmed) return;
 
-            if (event.target && event.target.closest && event.target.closest('#studio-relay-sync-toast, #channa-tab-session-badge, #studio-relay-page-overlays')) {
+            if (event.target && event.target.closest && event.target.closest('#studio-relay-sync-toast, #channa-tab-session-badge, #sesi-maxmode-pill, #studio-relay-page-overlays')) {
                 return;
             }
 
