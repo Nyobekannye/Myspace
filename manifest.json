@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Dola HD Downloader — Axiom",
+  "version": "1.0.0",
+  "description": "Mengunduh video Dola milik pengguna pada kualitas tertinggi yang tersedia dan menyembunyikan kontrol filter wajah.",
+  "permissions": ["downloads", "storage"],
+  "host_permissions": [
+    "https://dola.com/*",
+    "https://www.dola.com/*",
+    "https://*.ciciai.com/*",
+    "https://*.byteoversea.com/*",
+    "https://*.ibytedtos.com/*"
+  ],
+  "background": {
+    "service_worker": "src/service-worker.js"
+  },
+  "action": {
+    "default_title": "Dola HD Downloader",
+    "default_popup": "src/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://dola.com/*", "https://www.dola.com/*"],
+      "js": ["src/media-utils.js", "src/content.js"],
+      "css": ["src/content.css"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://dola.com/*", "https://www.dola.com/*"],
+      "js": ["src/page-bridge.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ]
+}
