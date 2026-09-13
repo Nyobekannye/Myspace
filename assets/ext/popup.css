@@ -42,17 +42,6 @@ html.is-standalone .app { max-width: 560px; padding: 22px 20px; }
 .status[data-state="off"] .led { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
 @keyframes led { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
 
-/* Mode segmented control (Chat biasa / Buat video) */
-.mode-seg { display: flex; padding: 3px; border-radius: 12px; background: var(--fill); gap: 2px; }
-.mode-seg .seg {
-    flex: 1; border: 0; border-radius: 9px; padding: 9px 8px; font: inherit; font-size: 14px; font-weight: 600;
-    color: var(--text2); background: transparent; cursor: pointer; transition: background .18s, color .18s, box-shadow .18s;
-}
-.mode-seg .seg[aria-checked="true"] { color: var(--text); background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.14), 0 0 0 .5px rgba(0,0,0,.04); }
-.mode-seg .seg:active { transform: scale(.98); }
-.mode-foot { margin: -6px 4px 0; font-size: 12px; color: var(--text2); }
-.max-banner.dimmed { opacity: .45; pointer-events: none; filter: grayscale(.6); }
-
 /* MAX MODE banner */
 .max-banner {
     display: flex; flex-direction: column; padding: 2px 14px; border-radius: var(--radius);

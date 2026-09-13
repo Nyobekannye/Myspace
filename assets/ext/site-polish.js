@@ -23,18 +23,17 @@
         { key: 'singleClip', cls: 'single', label: '1×30s', title: 'Paksa 1 video × 30 detik (satu klip utuh)' },
         { key: 'animeRef',   cls: 'anime',  label: 'Animasi', title: 'Referensi = karakter animasi, bukan wajah asli' }
     ];
-    const toggleState = { singleClip: true, animeRef: true, chatMode: false };
+    const toggleState = { singleClip: true, animeRef: true };
     let toggleStateLoaded = false;
     function storage() { try { return globalThis.chrome && chrome.storage && chrome.storage.local; } catch (e) { return null; } }
     function loadToggleState(cb) {
         const st = storage();
         if (!st) { toggleStateLoaded = true; cb && cb(); return; }
         try {
-            st.get(['singleClip', 'animeRef', 'dolaMode'], (res) => {
+            st.get(['singleClip', 'animeRef'], (res) => {
                 try { void chrome.runtime.lastError; } catch (e) {}
                 toggleState.singleClip = !res || res.singleClip !== false;
                 toggleState.animeRef = !res || res.animeRef !== false;
-                toggleState.chatMode = !!res && res.dolaMode === 'chat';
                 toggleStateLoaded = true;
                 cb && cb();
             });
@@ -43,7 +42,7 @@
     function saveToggle(key, on) {
         toggleState[key] = on;
         const st = storage();
-        const patch = key === 'chatMode' ? { dolaMode: on ? 'chat' : 'video' } : { [key]: on };
+        const patch = { [key]: on };
         try { st && st.set(patch, () => { try { void chrome.runtime.lastError; } catch (e) {} }); } catch (e) {}
         // enforcer listens for this too (in case storage events don't reach the MAIN world)
         try { window.postMessage(Object.assign({ type: 'WHEMPY_SINGLE_CLIP' }, patch), '*'); } catch (e) {}
@@ -54,24 +53,17 @@
             if (area && area !== 'local') return;
             let dirty = false;
             for (const t of TOGGLES) if (changes && changes[t.key]) { toggleState[t.key] = changes[t.key].newValue !== false; dirty = true; }
-            if (changes && changes.dolaMode) { toggleState.chatMode = changes.dolaMode.newValue === 'chat'; dirty = true; }
             if (dirty) renderToggleState(document.getElementById(SESSION_BADGE_ID));
         });
     } catch (e) {}
     function renderToggleState(badge) {
         if (!badge) return;
-        const chat = toggleState.chatMode === true;
-        badge.classList.toggle('chat-mode', chat);
-        const modeBtn = badge.querySelector('.ids-mode');
-        if (modeBtn) { modeBtn.textContent = chat ? '💬' : '🎬'; modeBtn.setAttribute('title', chat ? 'Mode: Chat biasa (MAX MODE dijeda) — ketuk untuk Buat video' : 'Mode: Buat video (MAX MODE aktif) — ketuk untuk Chat biasa'); modeBtn.setAttribute('aria-checked', chat ? 'true' : 'false'); }
         for (const t of TOGGLES) {
             const row = badge.querySelector('.ids-toggle.' + t.cls);
             if (!row) continue;
-            const on = !chat && toggleState[t.key] !== false;
+            const on = toggleState[t.key] !== false;
             row.classList.toggle('on', on);
-            row.classList.toggle('disabled', chat);
             row.setAttribute('aria-checked', on ? 'true' : 'false');
-            row.setAttribute('aria-disabled', chat ? 'true' : 'false');
         }
     }
 
@@ -92,19 +84,6 @@
         badge.removeAttribute('tabindex');
         if (badge.dataset.maxModeRendered !== 'true' || !badge.querySelector('.ids-toggle')) {
             badge.textContent = '';
-            // mode button (💬 chat biasa / 🎬 buat video) — leftmost
-            const modeBtn = document.createElement('span');
-            modeBtn.className = 'ids-mode';
-            modeBtn.setAttribute('role', 'switch');
-            modeBtn.setAttribute('tabindex', '0');
-            const flipMode = (event) => {
-                event.preventDefault(); event.stopPropagation();
-                saveToggle('chatMode', !(toggleState.chatMode === true));
-                renderToggleState(badge);
-            };
-            modeBtn.addEventListener('click', flipMode);
-            modeBtn.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') flipMode(event); });
-            badge.appendChild(modeBtn);
             for (const t of TOGGLES) {
                 const row = document.createElement('span');
                 row.className = 'ids-toggle ' + t.cls;
@@ -117,7 +96,6 @@
                 row.append(led, label, sw);
                 const flip = (event) => {
                     event.preventDefault(); event.stopPropagation();
-                    if (toggleState.chatMode === true) return;   // paused in chat mode
                     saveToggle(t.key, !(toggleState[t.key] !== false));
                     renderToggleState(badge);
                 };

@@ -1785,7 +1785,8 @@ public class MainActivity extends Activity {
         // Timer tamer untuk seluruh bundel (termasuk skrip legacy yang di-obfuscate dengan loop DOM 800–1000 ms):
         // shadow setInterval di blok ini → minimal 1500 ms, tidak jalan saat tab tersembunyi, dan 4 detik pertama
         // setelah navigasi dilewati supaya render awal Dola tidak berebut CPU dengan pemindai MAX MODE.
-        sb.append("const __wsi = window.setInterval.bind(window), __t0 = Date.now();\n")
+        sb.append("const __wNativeStringify = JSON.stringify;\n")   // salinan asli sebelum skrip legacy menimpanya
+          .append("const __wsi = window.setInterval.bind(window), __t0 = Date.now();\n")
           .append("const setInterval = function (fn, ms) { const args = Array.prototype.slice.call(arguments, 2); const m = Math.max(typeof ms === 'number' && ms > 0 ? ms : 0, 1500);\n")
           .append("  return __wsi(function () { if (Date.now() - __t0 < 4000 || document.visibilityState === 'hidden') return; try { return typeof fn === 'function' ? fn.apply(this, args) : (0, eval)(String(fn)); } catch (e) {} }, m); };\n");
         String bridgeRef = "window[" + JSONObject.quote(MAX_BRIDGE) + "]";

@@ -27,22 +27,17 @@
 
   const TAG = '[Whempy 1×30s]';
   const cfg = {
+    enabled: true,          // master switch (singleClip)
+    aggressive: true,       // L2 + L3 + L4 (aggressiveMode)
     duration: 30,
     promptInject: true,
     autoReply: true,
     autoAcceptSplit: false, // when Dola can only do 2×15s: auto-answer "Ya" instead of looping
     forceModel25: true,     // rewrite variables.model → Seedance 2.5 id (learned), decline server downgrade cards
-    chatMode: false         // "Chat biasa": every layer below goes fully passive so Dola behaves like stock
+    animeRef: true          // reference image = animated character (never a real face): prompt note + auto-answer refusals
   };
-  // Raw user switches; the public getters fold chatMode in so every gate in this file honours it.
-  const raw = { enabled: true, aggressive: true, animeRef: true };
-  Object.defineProperties(cfg, {
-    enabled:    { get: () => !cfg.chatMode && raw.enabled,    set: (v) => { raw.enabled = !!v; },    enumerable: true },
-    aggressive: { get: () => !cfg.chatMode && raw.aggressive, set: (v) => { raw.aggressive = !!v; }, enumerable: true },
-    animeRef:   { get: () => !cfg.chatMode && raw.animeRef,   set: (v) => { raw.animeRef = !!v; },   enumerable: true }
-  });
-  // L0 chat hook must stay armed while either feature is on
-  const active = () => cfg.enabled || cfg.animeRef;
+  // L0 chat hook is always armed: it also scrubs the legacy script's junk keys that break plain chat
+  const active = () => true;
 
   const log = (m) => { try { console.log(TAG, m); } catch (e) {} };
   const toast = (m) => {
@@ -60,7 +55,6 @@
     if (obj.autoAcceptSplit !== undefined) cfg.autoAcceptSplit = obj.autoAcceptSplit === true;
     if (obj.forceModel25 !== undefined) cfg.forceModel25 = obj.forceModel25 !== false;
     if (obj.animeRef !== undefined) cfg.animeRef = obj.animeRef !== false;
-    if (obj.dolaMode !== undefined) cfg.chatMode = obj.dolaMode === 'chat';
     if (obj.durationOverride || obj.duration) {
       const d = parseInt(obj.durationOverride || obj.duration, 10);
       if (d > 0) cfg.duration = d;
@@ -69,7 +63,7 @@
   try {
     const st = globalThis.chrome && chrome.storage && chrome.storage.local;
     if (st) {
-      st.get(['singleClip', 'aggressiveMode', 'promptInject', 'autoReply', 'durationOverride', 'autoAcceptSplit', 'forceModel25', 'animeRef', 'dolaMode'], (res) => {
+      st.get(['singleClip', 'aggressiveMode', 'promptInject', 'autoReply', 'durationOverride', 'autoAcceptSplit', 'forceModel25', 'animeRef'], (res) => {
         try { void chrome.runtime.lastError; } catch (e) {}
         applySettings(res || {});
         log('settings loaded: ' + JSON.stringify(cfg));
@@ -79,7 +73,7 @@
         const flat = {};
         Object.keys(changes || {}).forEach(k => { flat[k] = changes[k] && changes[k].newValue; });
         applySettings(flat);
-        toast('settings updated → ' + (cfg.chatMode ? '💬 CHAT BIASA (semua paksaan nonaktif)' : (cfg.enabled ? '1 video × ' + cfg.duration + 's' : 'OFF') + (cfg.aggressive ? ' (AGGRESSIVE)' : '') + (cfg.animeRef ? ' · ref=animasi' : '')));
+        toast('settings updated → ' + (cfg.enabled ? '1 video × ' + cfg.duration + 's' : 'OFF') + (cfg.aggressive ? ' (AGGRESSIVE)' : '') + (cfg.animeRef ? ' · ref=animasi' : ''));
       });
     }
   } catch (e) {}
@@ -90,7 +84,21 @@
   });
 
   // -------------------------------------------------------------- helpers
-  const origStringify = JSON.stringify;
+  // JSON.stringify seen here is already the legacy inject.js wrapper (it runs first and pollutes every
+  // object with junk keys). Re-serializing through it would re-pollute, so grab a pristine copy: the APK
+  // bundle prefix captures it before any script runs; standalone fallback = a fresh iframe realm.
+  const hooked = JSON.stringify;
+  const origStringify = (function () {
+    try { if (typeof __wNativeStringify === 'function') return __wNativeStringify; } catch (e) {}
+    try {
+      const f = document.createElement('iframe'); f.style.display = 'none';
+      (document.documentElement || document.head || document.body).appendChild(f);
+      const n = f.contentWindow && f.contentWindow.JSON && f.contentWindow.JSON.stringify;
+      f.remove();
+      if (typeof n === 'function') return n;
+    } catch (e) {}
+    return hooked;
+  })();
   // Periodic DOM scanners: skip while the tab is hidden, and defer the heavy ones to idle time so they
   // never compete with Dola's own rendering (this is what made the page feel stuck on load).
   const hidden = () => { try { return document.visibilityState === 'hidden'; } catch (e) { return false; } };
@@ -422,11 +430,28 @@
     return false;
   }
 
+  // Legacy ChannaTheBrand inject.js pollutes EVERY object passed through JSON.stringify with these keys.
+  // Dola's chat API rejects them in plain-chat `content` ({"text": …}) → message fails with a red "!".
+  const LEGACY_JUNK = ['allow_free_queue', 'accept_queue', 'credits', 'cost', 'audio', 'generate_audio', 'with_audio', 'has_audio', 'bgm', 'sound', 'no_watermark', 'remove_logo', 'quality'];
+  function stripLegacyJunk(o) {
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
+    let ch = false;
+    for (const k of LEGACY_JUNK) if (k in o) { delete o[k]; ch = true; }
+    return ch;
+  }
   // Rewrites a Dola message object in place. Returns true if changed.
   function dolaRewriteMessage(msg, forceVideo) {
     if (!msg || typeof msg !== 'object') return false;
     let changed = false;
     const isVideo = forceVideo || dolaMsgIsVideo(msg);
+    // L-1: plain chat (not a video skill) → scrub legacy junk from `content` {"text": …}; Dola rejects it there.
+    if (!isVideo) {
+      if (typeof msg.content === 'string' && msg.content.trim().startsWith('{')) {
+        try { const inner = JSON.parse(msg.content); if (stripLegacyJunk(inner)) { msg.content = origStringify(inner); changed = true; } } catch (e) {}
+      } else if (msg.content && typeof msg.content === 'object') { if (stripLegacyJunk(msg.content)) changed = true; }
+      if (msg.content_obj && typeof msg.content_obj === 'object' && stripLegacyJunk(msg.content_obj)) changed = true;
+      if (stripLegacyJunk(msg)) changed = true;
+    }
     if (isVideo && dolaForceModel(msg)) changed = true;
     const hasImage = payloadHasImage(msg) || recentImage();
     const fixText = (txt) => {
@@ -484,9 +509,13 @@
     };
     walk(j, 0);
     if (!changed) return str;
-    toast('🎯 Dola chat payload: prompt ' + (cfg.enabled ? 'forced to 1 video × ' + cfg.duration + 's' : 'tagged') + (cfg.animeRef ? ' · referensi = animasi' : ''));
-    if (!OWN_REPLY_RE.test(str)) { try { window.dispatchEvent(new Event('whempy:video-sent')); } catch (e) {} }
-    return origStringify(j);
+    const out = origStringify(j);
+    const injected = DIRECTIVE_RE.test(out) || ANIME_NOTE_RE.test(out);
+    if (injected) {
+      toast('🎯 Dola chat payload: prompt ' + (cfg.enabled ? 'forced to 1 video × ' + cfg.duration + 's' : 'tagged') + (cfg.animeRef ? ' · referensi = animasi' : ''));
+      if (!OWN_REPLY_RE.test(str)) { try { window.dispatchEvent(new Event('whempy:video-sent')); } catch (e) {} }
+    } else log('🧹 legacy junk keys stripped from chat payload');
+    return out;
   }
   const isDolaChatUrl = (u) => DOLA_CHAT_RE.test(String(u || ''));
 
@@ -512,8 +541,8 @@
     // Dola message objects: text-only injection, NEVER add unknown keys (server validates variables)
     try {
       if (active() && isDolaMsgTree(value)) {
-        if (dolaWalkObject(value)) toast('🎯 Dola message: prompt ' + (cfg.enabled ? 'forced to 1 video × ' + cfg.duration + 's' : 'tagged') + (cfg.animeRef ? ' · referensi = animasi' : ''));
-        return origStringify.apply(this, arguments);
+        if (dolaWalkObject(value)) { const o = origStringify(value); if (DIRECTIVE_RE.test(o) || ANIME_NOTE_RE.test(o)) toast('🎯 Dola message: prompt ' + (cfg.enabled ? 'forced to 1 video × ' + cfg.duration + 's' : 'tagged') + (cfg.animeRef ? ' · referensi = animasi' : '')); }
+        return origStringify.apply(JSON, arguments);   // native: keep the legacy wrapper away from the message tree
       }
     } catch (e) {}
     try {
@@ -524,7 +553,7 @@
         if (ch) report(ctx);
       }
     } catch (e) {}
-    return origStringify.apply(this, arguments);
+    return hooked.apply(this, arguments);
   };
 
   const origFetch = window.fetch;
@@ -954,6 +983,6 @@
   }
   everyIdle(badge, 4000);
 
-  window.__whempySingleClip = { cfg, forceJsonString, injectPrompt, injectAnimeNote, autoAnswer, enforceMenus, isChecked, visibleMenuItems, findSendButton, findComposer, autoTune, modelMap, learnFromText, dolaRewriteChatBody, setModelIs25: (v) => { modelIs25 = v; } };
+  window.__whempySingleClip = { cfg, forceJsonString, injectPrompt, injectAnimeNote, autoAnswer, stripLegacyJunk, enforceMenus, isChecked, visibleMenuItems, findSendButton, findComposer, autoTune, modelMap, learnFromText, dolaRewriteChatBody, setModelIs25: (v) => { modelIs25 = v; } };
   toast('armed → 1 video × ' + cfg.duration + 's' + (cfg.aggressive ? ' (AGGRESSIVE)' : '') + (cfg.animeRef ? ' · referensi = animasi' : ''));
 })();

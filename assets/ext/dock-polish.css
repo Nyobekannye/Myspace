@@ -186,19 +186,6 @@
 /* Legacy "Container: Default [30s HD • Off-Peak …]" status badge from the old script: hidden for good */
 #channa-tab-session-badge { display: none !important; visibility: hidden !important; pointer-events: none !important; }
 
-/* Mode button: 🎬 buat video / 💬 chat biasa */
-#sesi-maxmode-pill .ids-mode {
-    display: inline-flex !important; align-items: center !important; justify-content: center !important;
-    width: 30px !important; height: 28px !important; flex: 0 0 30px !important;
-    border-radius: 999px !important; font-size: 15px !important; line-height: 1 !important;
-    cursor: pointer !important; user-select: none !important; -webkit-tap-highlight-color: transparent !important;
-    background: rgba(255, 255, 255, 0.08) !important; outline: none !important;
-    transition: background 160ms ease, transform 160ms cubic-bezier(.2,.8,.2,1) !important;
-}
-#sesi-maxmode-pill .ids-mode:active { transform: scale(0.94) !important; }
-#sesi-maxmode-pill.chat-mode .ids-mode { background: rgba(10, 132, 255, 0.35) !important; }
-#sesi-maxmode-pill .ids-toggle.disabled { opacity: 0.45 !important; cursor: not-allowed !important; }
-
 /* One toggle "chip": LED · label · mini switch */
 #sesi-maxmode-pill .ids-toggle {
     display: inline-flex !important;
@@ -215,7 +202,7 @@
 #sesi-maxmode-pill .ids-toggle:active { transform: scale(0.96) !important; }
 #sesi-maxmode-pill .ids-toggle.on { background: rgba(255, 255, 255, 0.08) !important; }
 #sesi-maxmode-pill .ids-toggle + .ids-toggle { border-left: 0.5px solid rgba(255, 255, 255, 0.12) !important; border-radius: 0 999px 999px 0 !important; }
-#sesi-maxmode-pill .ids-mode + .ids-toggle { border-radius: 999px 0 0 999px !important; }
+#sesi-maxmode-pill .ids-toggle:first-child { border-radius: 999px 0 0 999px !important; }
 
 /* LED — green pulse when ON, grey when OFF */
 #sesi-maxmode-pill .ids-led {
