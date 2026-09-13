@@ -1782,6 +1782,12 @@ public class MainActivity extends Activity {
         if (maxModeScriptCache != null) return maxModeScriptCache;
         StringBuilder sb = new StringBuilder();
         sb.append("if (window === window.top && /(^|\\.)(dola\\.com|seaart\\.ai)$/i.test(location.hostname) && !window.__whempyInjected) { window.__whempyInjected = true;\n");
+        // Timer tamer untuk seluruh bundel (termasuk skrip legacy yang di-obfuscate dengan loop DOM 800–1000 ms):
+        // shadow setInterval di blok ini → minimal 1500 ms, tidak jalan saat tab tersembunyi, dan 4 detik pertama
+        // setelah navigasi dilewati supaya render awal Dola tidak berebut CPU dengan pemindai MAX MODE.
+        sb.append("const __wsi = window.setInterval.bind(window), __t0 = Date.now();\n")
+          .append("const setInterval = function (fn, ms) { const args = Array.prototype.slice.call(arguments, 2); const m = Math.max(typeof ms === 'number' && ms > 0 ? ms : 0, 1500);\n")
+          .append("  return __wsi(function () { if (Date.now() - __t0 < 4000 || document.visibilityState === 'hidden') return; try { return typeof fn === 'function' ? fn.apply(this, args) : (0, eval)(String(fn)); } catch (e) {} }, m); };\n");
         String bridgeRef = "window[" + JSONObject.quote(MAX_BRIDGE) + "]";
         sb.append(readAsset("chrome-shim.js").replace("__CTX__", "page").replace("window.__WhempyBridge", bridgeRef)).append("\n;\n");
         sb.append("try { delete ").append(bridgeRef).append("; } catch (e) {}\n");

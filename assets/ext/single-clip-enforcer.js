@@ -91,6 +91,11 @@
 
   // -------------------------------------------------------------- helpers
   const origStringify = JSON.stringify;
+  // Periodic DOM scanners: skip while the tab is hidden, and defer the heavy ones to idle time so they
+  // never compete with Dola's own rendering (this is what made the page feel stuck on load).
+  const hidden = () => { try { return document.visibilityState === 'hidden'; } catch (e) { return false; } };
+  const ric = window.requestIdleCallback ? (fn) => window.requestIdleCallback(fn, { timeout: 1500 }) : (fn) => setTimeout(fn, 50);
+  const everyIdle = (fn, ms) => { let busy = false; setInterval(() => { if (busy || hidden()) return; busy = true; ric(() => { try { fn(); } finally { busy = false; } }); }, ms); };
   const bypass = (url, body, opts) => {
     try { return typeof window.__isStudioRelayBypassRequest === 'function' && window.__isStudioRelayBypassRequest(url, body, opts); }
     catch (e) { return false; }
@@ -152,7 +157,7 @@
     } catch (e) { return false; }
   }
   let lastImageSeen = 0;
-  setInterval(() => { if (cfg.animeRef && composerHasImage()) lastImageSeen = Date.now(); }, 700);
+  everyIdle(() => { if (cfg.animeRef && composerHasImage()) lastImageSeen = Date.now(); }, 1200);
   const recentImage = () => Date.now() - lastImageSeen < 8000;
   function payloadHasImage(obj) {
     try { return IMAGE_KEY_RE.test(origStringify(obj).slice(0, 60000)); } catch (e) { return false; }
@@ -189,8 +194,14 @@
     if (typeof str === 'string') return VIDEO_KEY_RE.test(str) || /"generate_type"\s*:\s*"video"|"task_type"\s*:\s*"video"|\bvideo\b/i.test(str);
     return false;
   }
+  const VIDEO_TOP_KEYS = ['duration', 'video_duration', 'motion_seconds', 'video_length', 'seconds', 'clip_duration', 'aspect_ratio', 'ratio', 'resolution', 'generate_type', 'task_type', 'video_count', 'num_videos', 'prompt', 'negative_prompt', 'image_url', 'first_frame', 'last_frame', 'reference_image', 'variables', 'messages', 'content', 'skill_type'];
   function isVideoObject(obj) {
     if (!obj || typeof obj !== 'object') return false;
+    // cheap pre-check on top-level keys: Dola stringifies lots of analytics/state objects per second
+    try {
+      const keys = Array.isArray(obj) ? (obj[0] && typeof obj[0] === 'object' ? Object.keys(obj[0]) : []) : Object.keys(obj);
+      if (!keys.some(k => VIDEO_TOP_KEYS.includes(k))) return false;
+    } catch (e) { return false; }
     try { return isVideoPayload(origStringify(obj).slice(0, 20000), null); } catch (e) { return false; }
   }
 
@@ -563,7 +574,9 @@
     try {
       const u = typeof input === 'string' ? input : (input && input.url) || '';
       const ct = (res && res.headers && res.headers.get && res.headers.get('content-type')) || '';
-      if (cfg.enabled && res && /dola\.com|ciciai|samantha|alice/i.test(u) && /json|text|event-stream/i.test(ct) && !/\.(mp4|webm|m3u8|jpg|png|gif|js|css)(\?|$)/i.test(u)) {
+      const len = Number((res && res.headers && res.headers.get && res.headers.get('content-length')) || 0);
+      // never tee the chat SSE stream (event-stream): cloning it buffers the whole reply twice
+      if (cfg.enabled && cfg.forceModel25 && model25() === undefined && res && len < 512 * 1024 && /dola\.com|ciciai|samantha|alice/i.test(u) && /json|text/i.test(ct) && !/event-stream/i.test(ct) && !/\.(mp4|webm|m3u8|jpg|png|gif|js|css)(\?|$)/i.test(u)) {
         res.clone().text().then(learnFromText).catch(() => {});
       }
     } catch (e) {}
@@ -604,7 +617,7 @@
   XMLHttpRequest.prototype.send = function (body) {
     try {
     try { if (active() && typeof body === 'string' && isDolaChatUrl(this.__wUrl)) body = dolaRewriteChatBody(body, this.__wUrl); } catch (e) {}
-    try { if (cfg.enabled) this.addEventListener('loadend', function () { try { if ((this.responseType === '' || this.responseType === 'text') && typeof this.responseText === 'string') learnFromText(this.responseText); else if (this.responseType === 'json' && this.response) learnFromObject(this.response, 0); } catch (e) {} }); } catch (e) {}
+    try { if (cfg.enabled && cfg.forceModel25 && model25() === undefined) this.addEventListener('loadend', function () { try { if ((this.responseType === '' || this.responseType === 'text') && typeof this.responseText === 'string') learnFromText(this.responseText); else if (this.responseType === 'json' && this.response) learnFromObject(this.response, 0); } catch (e) {} }); } catch (e) {}
       if (cfg.enabled && body && !bypass(this.__wUrl || this._url, body, { method: this.__wMethod })) {
         if (typeof body === 'string') body = forceJsonString(body, this.__wUrl);
         else if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) body = new URLSearchParams(forceLooseString(body.toString(), this.__wUrl));
@@ -677,7 +690,8 @@
   const REFUSE_FACE_RE = /(wajah|foto|gambar|orang|figur|tokoh|manusia)\s*(asli|nyata|sungguhan|sebenarnya|real)|orang\s*(yang\s*)?(nyata|asli|sebenarnya)|real[- ](person|people|human|face|individual|photo|photograph|portrait)|actual (person|people|human|face)|(human|person'?s?|someone'?s?) (face|likeness|identity)|photorealistic (person|human|face)|(identifiable|recognizable) (person|people|individual|face)|likeness|(privacy|portrait|publicity|image) rights|hak (privasi|potret|cipta wajah)|public figure|celebrit|selebriti|deepfake|(cannot|can't|unable to|not able to|tidak (bisa|dapat)|nggak bisa|gak bisa)[^.]{0,80}(real|asli|nyata|photo|foto|face|wajah|person|orang)/i;
 
   const isVisible = (el) => { try { const r = el.getBoundingClientRect(); return r.width > 2 && r.height > 2; } catch (e) { return false; } };
-  const txtOf = (el) => (el && (el.innerText || el.textContent) || '').replace(/\s+/g, ' ').trim();
+  // textContent only: innerText forces a synchronous layout per call, and these scanners touch thousands of nodes.
+  const txtOf = (el) => (el && el.textContent || '').replace(/\s+/g, ' ').trim();
 
   function findComposer() {
     return document.querySelector('textarea, [contenteditable="true"], input[type="text"][placeholder*="message" i], input[type="text"][placeholder*="ask" i], input[type="text"][placeholder*="tanya" i], input[type="text"][placeholder*="pesan" i]');
@@ -763,7 +777,10 @@
     for (const p of svgs) { const d = p.getAttribute('d') || ''; if (/^M\d[\d.\s]*L?[\d.\s]*(l|L)[\d.\s-]*(l|L)/.test(d) && d.length < 120 && d.split(/[LlMm]/).length <= 5) return true; }
     return false;
   }
+  const MENU_HOST_SEL = '[role="menu"], [role="listbox"], [role="dialog"], [role="menuitem"], [role="option"], [role="menuitemradio"], [class*="popup" i], [class*="dropdown" i], [class*="popover" i]';
+  function menuOpen() { try { return !!document.querySelector(MENU_HOST_SEL); } catch (e) { return false; } }
   function visibleMenuItems() {
+    if (!menuOpen()) return [];
     return Array.from(document.querySelectorAll('[role="menuitem"], [role="option"], [role="menuitemradio"], [role="radio"], [role="listitem"], li, button, [class*="item" i], [class*="option" i], [class*="menu" i] div, [class*="popup" i] div, [class*="dropdown" i] div, [role="menu"] div, [role="dialog"] div')).filter(isVisible);
   }
   function removeFakeOptions() {
@@ -798,9 +815,17 @@
       }
     } catch (e) {}
   }
-  const mo = new MutationObserver(() => { clearTimeout(mo._t); mo._t = setTimeout(enforceMenus, 120); });
+  // Mutation-driven: debounce hard, ignore text-only churn (chat streaming), and skip during the first seconds of load.
+  const bootAt = Date.now();
+  const mo = new MutationObserver((muts) => {
+    if (hidden() || Date.now() - bootAt < 4000) return;
+    let relevant = false;
+    for (const m of muts) { if (m.addedNodes && m.addedNodes.length) { relevant = true; break; } }
+    if (!relevant) return;
+    clearTimeout(mo._t); mo._t = setTimeout(() => ric(enforceMenus), 350);
+  });
   try { mo.observe(document.documentElement || document, { childList: true, subtree: true }); } catch (e) {}
-  setInterval(enforceMenus, 1500);
+  everyIdle(enforceMenus, 2500);
 
   // One-shot auto-tune: open Dola's "…" params popup → Model → 2.5, → duration → max, then close.
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -833,7 +858,7 @@
     } catch (e) {} finally { tuning = false; }
   }
   // run once when video mode appears, and re-run after every detected video prompt send
-  setInterval(() => { if (!tunedOnce) autoTune('init'); }, 4000);
+  everyIdle(() => { if (!tunedOnce && Date.now() - bootAt > 6000) autoTune('init'); }, 5000);
   window.addEventListener('whempy:video-sent', () => { arReset(); setTimeout(() => autoTune('post-send'), 2500); });
 
   // ---- L3: chat auto-answer ------------------------------------------------------------------
@@ -841,9 +866,11 @@
     if (!(cfg.enabled && cfg.aggressive) && !cfg.animeRef) return;
     if (!document.body) return;
     try {
-      const leaves = document.querySelectorAll('p, span, div, li');
+      // scan only the tail of the page (last bubbles) — never the whole tree
+      const all = document.querySelectorAll('p, li, span, div');
+      const leaves = all.length > 300 ? Array.prototype.slice.call(all, all.length - 300) : all;
       let asker = null, refused = false, faceAsker = null;
-      for (let i = leaves.length - 1; i >= 0 && i > leaves.length - 500; i--) {
+      for (let i = leaves.length - 1; i >= 0; i--) {
         const el = leaves[i];
         if (el.children.length > 2 || handled.has(el)) continue;
         const txt = txtOf(el);
@@ -908,13 +935,13 @@
       }
     } catch (e) {}
   }
-  setInterval(autoAnswer, 900);
+  everyIdle(autoAnswer, 2000);
 
   // Badge: show REAL state instead of legacy's cosmetic "30s (Bypassed)"
   function badge() {
     if (!cfg.enabled || !document.body) return;
     try {
-      const nodes = document.querySelectorAll('span, div, button');
+      const nodes = document.querySelectorAll('[data-channa-opt], [class*="duration" i], [class*="pill" i], [class*="badge" i], button');
       for (const n of nodes) {
         if (n.children.length > 1) continue;
         const t = txtOf(n);
@@ -925,7 +952,7 @@
       }
     } catch (e) {}
   }
-  setInterval(badge, 1500);
+  everyIdle(badge, 4000);
 
   window.__whempySingleClip = { cfg, forceJsonString, injectPrompt, injectAnimeNote, autoAnswer, enforceMenus, isChecked, visibleMenuItems, findSendButton, findComposer, autoTune, modelMap, learnFromText, dolaRewriteChatBody, setModelIs25: (v) => { modelIs25 = v; } };
   toast('armed → 1 video × ' + cfg.duration + 's' + (cfg.aggressive ? ' (AGGRESSIVE)' : '') + (cfg.animeRef ? ' · referensi = animasi' : ''));

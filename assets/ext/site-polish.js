@@ -264,25 +264,50 @@
         polishPage(document);
         if (!document.documentElement) return;
 
+        // Batch mutations and process them at idle time: Dola streams chat text and re-renders large
+        // subtrees during load; walking each one synchronously made the page feel frozen.
+        const ric = window.requestIdleCallback ? (fn) => window.requestIdleCallback(fn, { timeout: 1000 }) : (fn) => setTimeout(fn, 60);
+        const pendingText = new Set();
+        const pendingNodes = new Set();
+        let scheduled = false, badgeDirty = false;
+        const flush = () => {
+            scheduled = false;
+            if (badgeDirty) { badgeDirty = false; polishSessionBadge(); }
+            const texts = Array.from(pendingText); pendingText.clear();
+            const nodes = Array.from(pendingNodes); pendingNodes.clear();
+            const budget = Date.now() + 12;   // ms per idle slice; the rest is re-queued
+            let i = 0;
+            for (; i < texts.length && Date.now() < budget; i++) { polishModeTextNode(texts[i]); polishDownloadTextNode(texts[i]); }
+            for (; i - texts.length < nodes.length && Date.now() < budget; i++) {
+                const node = nodes[i - texts.length];
+                if (!node.isConnected) continue;
+                polishModeLabels(node); polishDownloadLabels(node); polishPromptDockButtons(node);
+            }
+            if (i < texts.length + nodes.length) {
+                for (let k = i; k < texts.length; k++) pendingText.add(texts[k]);
+                for (let k = Math.max(0, i - texts.length); k < nodes.length; k++) pendingNodes.add(nodes[k]);
+                schedule();
+            }
+        };
+        const schedule = () => { if (scheduled) return; scheduled = true; ric(flush); };
         new MutationObserver((mutations) => {
-            polishSessionBadge();
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'characterData') {
-                    polishModeTextNode(mutation.target);
-                    polishDownloadTextNode(mutation.target);
-                    return;
+            if (document.visibilityState === 'hidden') return;
+            for (const mutation of mutations) {
+                if (mutation.type === 'characterData') { pendingText.add(mutation.target); continue; }
+                if (mutation.target && mutation.target.id === SESSION_BADGE_ID) continue;   // our own pill
+                for (const node of mutation.addedNodes) {
+                    if (node.nodeType === 1 && node.id === SESSION_BADGE_ID) { badgeDirty = true; continue; }
+                    if (node.nodeType === 1 || node.nodeType === 3) pendingNodes.add(node);
                 }
-                mutation.addedNodes.forEach((node) => {
-                    polishModeLabels(node);
-                    polishDownloadLabels(node);
-                    polishPromptDockButtons(node);
-                });
-            });
+            }
+            if (pendingText.size || pendingNodes.size || badgeDirty) schedule();
         }).observe(document.documentElement, {
             childList: true,
             characterData: true,
             subtree: true
         });
+        // pill may be (re)created by the legacy script at any time
+        setInterval(() => { if (document.visibilityState !== 'hidden') polishSessionBadge(); }, 2000);
     }
 
     function triggerFullClick(element) {

@@ -2830,7 +2830,8 @@
         if (durationMenuObserver || !isDoubaoPage() || !document.documentElement) return;
 
         durationMenuObserver = new MutationObserver(() => {
-            inject15sDurationOption();
+            clearTimeout(durationMenuObserver._t);
+            durationMenuObserver._t = setTimeout(inject15sDurationOption, 250);
         });
         durationMenuObserver.observe(document.documentElement, { childList: true, subtree: true });
         setTimeout(inject15sDurationOption, 1200);
