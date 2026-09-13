@@ -1,8 +1,10 @@
-# Sesi Browser × Introvert Dreams MAX MODE
+# Sesi Browser × Sesi MAX MODE
 
 Satu APK: **Sesi Browser v6.1.3** (multi-sesi, anti-fingerprint, multi-tab, unduhan) digabung dengan
-**Introvert Dreams MAX MODE v2.3** (Dola companion: 1 video × 30s, Max HD, tanpa watermark, kunci Seedance 2.5,
-akun Google tersimpan & autofill).
+**Sesi MAX MODE v2.4** (Dola companion: 1 video × 30s, Max HD, tanpa watermark, kunci Seedance 2.5,
+referensi gambar dipaksa dianggap karakter animasi (bukan wajah asli), akun Google tersimpan & autofill).
+
+Developer: **Whempy & Dhon** · WA 628889841098
 
 ## Cara kerja gabungan
 - Setiap tab Sesi Browser memuat skrip MAX MODE di `document_start` **hanya** untuk `dola.com` / `seaart.ai`
@@ -10,7 +12,7 @@ akun Google tersimpan & autofill).
   disembunyikan supaya tidak jadi penanda fingerprint.
 - `background.js` ekstensi berjalan di WebView tersembunyi (`assets/background.html`); `popup.html` dibuka
   sebagai layar penuh dari tombol MAX MODE (muncul di kanan-bawah saat tab aktif di Dola/Seaart) atau dari
-  Pengaturan → *Introvert Dreams MAX MODE* (tahan = buka Dola di tab baru).
+  Pengaturan → *Sesi MAX MODE* (tahan = buka Dola di tab baru).
 - Unduhan dari ekstensi (`chrome.downloads`) masuk ke `Download/Whempy_Videos/` dan ikut tampil di daftar
   unduhan Sesi Browser.
 - Akun Google tersimpan terenkripsi (Android Keystore, AES/GCM) — sama seperti MAX MODE asli.

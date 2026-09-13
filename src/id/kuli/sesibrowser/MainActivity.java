@@ -88,7 +88,7 @@ public class MainActivity extends Activity {
     private int headerHeight = 0, lastScrollY = 0;
     private String currentUrl = "";
 
-    // ---- Introvert Dreams MAX MODE (Dola/Seaart companion) ----
+    // ---- Sesi MAX MODE (Dola/Seaart companion) ----
     private ExtRuntime rt;                       // emulasi runtime ekstensi Chrome (storage, messaging, downloads)
     private WebView bgWeb;                       // WebView tersembunyi: background.js (service worker ekstensi)
     private WebView popupWeb;                    // UI popup ekstensi (popup.html)
@@ -354,8 +354,8 @@ public class MainActivity extends Activity {
     private void detach(final Tab t) {
         final WebView wv = t.web;
         if (wv == null) return;
-        t.web = null;
         wv.animate().cancel();
+        t.web = null;
         wv.setVisibility(View.GONE);
         ((FrameLayout) webCard).removeView(wv);
         try { wv.stopLoading(); wv.destroy(); } catch (Throwable ignored) {}
@@ -399,7 +399,7 @@ public class MainActivity extends Activity {
             @Override public void onSwipeMove(float dx) {
                 pill.setTranslationX(dx * 0.45f);
                 pill.setAlpha(Math.max(0.5f, 1f - Math.abs(dx) / (threshold * 4f)));
-                if (web == null || tabs.size() < 2) return;
+                if (web == null || cur == null || tabs.size() < 2) return;
                 int i = tabs.indexOf(cur);
                 boolean canGo = dx < 0 ? i < tabs.size() - 1 : i > 0;
                 if (!layered) { web.setLayerType(View.LAYER_TYPE_HARDWARE, null); layered = true; }
@@ -481,7 +481,8 @@ public class MainActivity extends Activity {
             if (t == null || tabs.size() >= MAX_TABS) break;
             t.title = l.get(i)[1];
         }
-        if (curIdx < tabs.size()) selectTab(tabs.get(curIdx));
+        if (tabs.isEmpty()) return;
+        selectTab(tabs.get(Math.min(curIdx, tabs.size() - 1)));
     }
 
     // ------------------------------------------------------------------ Tab switcher (grid)
@@ -1657,10 +1658,11 @@ public class MainActivity extends Activity {
     @Override protected void onDestroy() { if (dlReceiver != null) { try { unregisterReceiver(dlReceiver); } catch (Exception ignored) {} dlReceiver = null; }
         if (fileCallback != null) { try { fileCallback.onReceiveValue(null); } catch (Exception ignored) {} fileCallback = null; }
         saveTabs(); CookieManager.getInstance().flush(); KeepAliveService.stop(this); if (regionDetector != null) regionDetector.stop(); for (Tab t : tabs) t.destroy(); tabs.clear();
+        if (tabsDialog != null) { try { tabsDialog.dismiss(); } catch (Throwable ignored) {} tabsDialog = null; }
         if (rt != null) rt.destroy(); closeMaxPopup(); if (bgWeb != null) { try { bgWeb.destroy(); } catch (Throwable ignored) {} bgWeb = null; }
         super.onDestroy(); }
 
-    // ================================================================== Introvert Dreams MAX MODE
+    // ================================================================== Sesi MAX MODE
     /** Nama objek jembatan ekstensi di halaman (acak per proses; disembunyikan lagi di luar Dola/Seaart, lihat maxModeGuardScript). */
     private static final String MAX_BRIDGE = "_w" + Long.toHexString(Double.doubleToLongBits(Math.random())).substring(1, 8);
     private static final java.util.regex.Pattern MAX_HOST = java.util.regex.Pattern.compile("(^|\\.)(dola\\.com|seaart\\.ai)$", java.util.regex.Pattern.CASE_INSENSITIVE);
@@ -1699,16 +1701,19 @@ public class MainActivity extends Activity {
         maxFab = new ImageView(this);
         maxFab.setImageResource(R.drawable.ic_maxmode);
         maxFab.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        maxFab.setElevation(Ui.dp(this, 6));
+        maxFab.setElevation(Ui.dp(this, 4));
         maxFab.setOutlineProvider(android.view.ViewOutlineProvider.BACKGROUND);
         android.graphics.drawable.GradientDrawable fabBg = new android.graphics.drawable.GradientDrawable();
-        fabBg.setColor(0xFF17181C); fabBg.setCornerRadius(Ui.dp(this, 16));
+        fabBg.setColor(0xFF17181C); fabBg.setCornerRadius(Ui.dp(this, 10));
         maxFab.setBackground(fabBg);
         maxFab.setClipToOutline(true);
+        maxFab.setAlpha(0.9f);
         maxFab.setContentDescription("MAX MODE");
-        int size = Ui.dp(this, 48), m = Ui.dp(this, 12);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size, android.view.Gravity.BOTTOM | android.view.Gravity.END);
-        lp.setMargins(0, 0, m, Ui.dp(this, 16));
+        // Kecil, menempel di tepi kanan tengah — tidak menutupi komposer Dola di bawah; sedikit di atas
+        // pusat supaya tidak bertumpuk dengan btnShrink (juga end|center_vertical) saat mode penuh
+        int size = Ui.dp(this, 30), m = Ui.dp(this, 6);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size, android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.END);
+        lp.setMargins(0, 0, m, Ui.dp(this, 88));
         maxFab.setLayoutParams(lp);
         maxFab.setVisibility(View.GONE);
         Ui.pressable(maxFab);
@@ -1725,8 +1730,10 @@ public class MainActivity extends Activity {
     private void updateMaxFab() {
         if (maxFab == null) return;
         boolean show = isMaxModeHost(currentUrl);
-        if (show && maxFab.getVisibility() != View.VISIBLE) { maxFab.setAlpha(0f); maxFab.setScaleX(0.6f); maxFab.setScaleY(0.6f); maxFab.setVisibility(View.VISIBLE); maxFab.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(220).setInterpolator(Ui.POP).start(); }
+        maxFab.animate().cancel();
+        if (show && maxFab.getVisibility() != View.VISIBLE) { maxFab.setAlpha(0f); maxFab.setScaleX(0.6f); maxFab.setScaleY(0.6f); maxFab.setVisibility(View.VISIBLE); maxFab.animate().alpha(0.9f).scaleX(1f).scaleY(1f).setDuration(220).setInterpolator(Ui.POP).start(); }
         else if (!show && maxFab.getVisibility() == View.VISIBLE) { maxFab.animate().alpha(0f).scaleX(0.6f).scaleY(0.6f).setDuration(150).withEndAction(() -> maxFab.setVisibility(View.GONE)).start(); }
+        else if (show && maxFab.getAlpha() < 0.9f) maxFab.animate().alpha(0.9f).scaleX(1f).scaleY(1f).setDuration(150).start();   // fade-out dibatalkan di tengah jalan
         if (show) maxFab.bringToFront();
     }
 

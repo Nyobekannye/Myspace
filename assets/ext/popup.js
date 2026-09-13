@@ -1,5 +1,5 @@
 /**
- * Introvert Dreams MAX MODE v2.3 by Whempy — iOS 17 style popup.
+ * Sesi MAX MODE v2.4 by Whempy & Dhon — iOS 17 style popup.
  * 30s · Max HD · no watermark are locked. Auto-download is a user setting (default OFF,
  * toggle in Settings). The UI shows status, a Scan button and a per-video download list for the most recent Dola tab.
  * Works as a side panel (desktop) and as a standalone tab (Kiwi & other mobile browsers).
@@ -145,12 +145,18 @@
     const swAggr = $('sw-aggressive');
     const swSplit = $('sw-accept-split');
     const swForce25 = $('sw-force-25');
-    chrome.storage.local.get(['singleClip', 'aggressiveMode', 'autoAcceptSplit', 'forceModel25'], res => {
+    const swAnime = $('sw-anime-ref');
+    chrome.storage.local.get(['singleClip', 'aggressiveMode', 'autoAcceptSplit', 'forceModel25', 'animeRef'], res => {
         void chrome.runtime.lastError;
         swSingle.checked = res?.singleClip !== false;
         swAggr.checked = res?.aggressiveMode !== false;
         swSplit.checked = res?.autoAcceptSplit === true;
         swForce25.checked = res?.forceModel25 !== false;
+        swAnime.checked = res?.animeRef !== false;
+    });
+    swAnime.addEventListener('change', () => {
+        chrome.storage.local.set({ animeRef: swAnime.checked }, () => void chrome.runtime.lastError);
+        setHint(swAnime.checked ? 'Referensi animasi AKTIF — setiap prompt video dengan gambar referensi diberi catatan "ini karakter animasi, bukan orang asli", dan penolakan "wajah asli" dijawab otomatis.' : 'Referensi animasi nonaktif — Dola menilai gambar referensi apa adanya.', 'ok');
     });
     swForce25.addEventListener('change', () => {
         chrome.storage.local.set({ forceModel25: swForce25.checked }, () => void chrome.runtime.lastError);
@@ -174,6 +180,7 @@
         if (changes.aggressiveMode) swAggr.checked = changes.aggressiveMode.newValue !== false;
         if (changes.autoAcceptSplit) swSplit.checked = changes.autoAcceptSplit.newValue === true;
         if (changes.forceModel25) swForce25.checked = changes.forceModel25.newValue !== false;
+        if (changes.animeRef) swAnime.checked = changes.animeRef.newValue !== false;
     });
 
     refresh();

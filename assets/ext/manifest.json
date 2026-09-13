@@ -1,9 +1,9 @@
 {
     "manifest_version": 3,
-    "name": "Introvert Dreams MAX MODE",
+    "name": "Sesi MAX MODE",
     "short_name": "MAX MODE",
-    "version": "2.3",
-    "description": "Introvert Dreams MAX MODE by Whempy — Dola companion: every video 30s as ONE single clip (never 2), max HD, no watermark. Aggressive single-clip enforcer. Auto-download optional (Settings).",
+    "version": "2.4",
+    "description": "Sesi MAX MODE by Whempy & Dhon — Dola companion: every video 30s as ONE single clip (never 2), max HD, no watermark. Aggressive single-clip enforcer. Auto-download optional (Settings).",
     "icons": {
         "16": "icon16.png",
         "48": "icon48.png",
@@ -71,7 +71,7 @@
         }
     ],
     "action": {
-        "default_title": "Introvert Dreams MAX MODE",
+        "default_title": "Sesi MAX MODE",
         "default_icon": {
             "16": "icon16.png",
             "48": "icon48.png",
@@ -95,7 +95,7 @@
             ]
         }
     ],
-    "author": "Whempy",
+    "author": "Whempy & Dhon",
     "homepage_url": "https://wa.me/628889841098",
     "minimum_chrome_version": "114"
 }

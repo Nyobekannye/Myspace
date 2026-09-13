@@ -1,4 +1,4 @@
 build/
-*.apk
+/*.apk
 *.keystore
 .hoplite/

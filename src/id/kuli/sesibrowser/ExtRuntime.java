@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Emulates the Chrome extension runtime (Introvert Dreams MAX MODE) on top of Sesi Browser:
+ * Emulates the Chrome extension runtime (Sesi MAX MODE) on top of Sesi Browser:
  * message routing, storage, tabs, downloads. `page` always points at the WebView of the active tab.
  */
 public class ExtRuntime {

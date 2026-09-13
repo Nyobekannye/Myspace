@@ -6,9 +6,9 @@
     const WHATSAPP_URL = 'https://wa.me/628889841098';
     const MODE_LABEL_TEXT = '30s (MAX MODE)';
     const LEGACY_MODE_PATTERN = /^\s*(\d+)\s*s\s*\(\s*bypassed\s*\)\s*$/i;
-    const ACTIVE_MODE_PATTERN = /^\s*(\d+)\s*s\s*\(\s*(?:kartar|introvert|whempy|max)\s+mode\s*\)\s*$/i;
+    const ACTIVE_MODE_PATTERN = /^\s*(\d+)\s*s\s*\(\s*(?:kartar|introvert|whempy|sesi|max)\s+mode\s*\)\s*$/i;
     const INLINE_LEGACY_MODE_PATTERN = /(\d+)\s*s\s*\(\s*bypassed\s*\)/gi;
-    const RELEVANT_MODE_TEXT = /bypassed|(?:kartar|introvert|whempy|max)\s+mode/i;
+    const RELEVANT_MODE_TEXT = /bypassed|(?:kartar|introvert|whempy|sesi|max)\s+mode/i;
     const DOWNLOAD_LABEL_TEXT = 'Fetch & Download done';
     const LEGACY_DOWNLOAD_PATTERN = /^\s*(?:.{0,6}\s*)?fetch\s*\d+\s*s\s*hd\s*video\s*$/iu;
     const ACTIVE_DOWNLOAD_PATTERN = /^\s*fetch\s*&\s*download\s*done\s*$/i;
@@ -19,8 +19,8 @@
         const badge = document.getElementById(SESSION_BADGE_ID);
         if (!badge) return;
         badge.classList.add('studio-relay-session-badge');
-        badge.setAttribute('aria-label', `${SESSION_BADGE_TEXT} — Introvert Dreams by Whempy (tap to chat on WhatsApp)`);
-        badge.setAttribute('title', 'Introvert Dreams MAX MODE by Whempy — tap to chat on WhatsApp');
+        badge.setAttribute('aria-label', `${SESSION_BADGE_TEXT} — Sesi by Whempy & Dhon (tap to chat on WhatsApp)`);
+        badge.setAttribute('title', 'Sesi MAX MODE by Whempy & Dhon — tap to chat on WhatsApp');
         badge.setAttribute('role', 'link');
         badge.setAttribute('tabindex', '0');
         if (badge.dataset.studioRelayWhatsappBound !== 'true') {

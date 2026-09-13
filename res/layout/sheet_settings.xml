@@ -212,14 +212,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Introvert Dreams MAX MODE"
+                android:text="Sesi MAX MODE"
                 android:textSize="15sp"
                 android:textColor="@color/text" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Dola: 1 video × 30s · Max HD · tanpa watermark · akun tersimpan. Tahan = buka Dola"
+                android:text="Dola: 1 video × 30s · Max HD · tanpa watermark · referensi animasi. Tahan = buka Dola"
                 android:textSize="12sp"
                 android:textColor="@color/text3" />
         </LinearLayout>
@@ -236,7 +236,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="22dp"
         android:gravity="center"
-        android:text="Dibuat oleh Whempy  ·  WA 628889841098"
+        android:text="Dibuat oleh Whempy &amp; Dhon  ·  WA 628889841098"
         android:textColor="@color/text3"
         android:textSize="12sp"
         android:padding="8dp"
