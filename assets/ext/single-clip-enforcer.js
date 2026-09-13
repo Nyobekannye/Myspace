@@ -124,7 +124,7 @@
 
   const isVideoish = (s) => /video|clip|animate|animation|motion|film|movie|scene|shot|cinematic|generate|render|buat|animasi|gerak|bikin|render/i.test(String(s || ''));
 
-  const DIRECTIVE = () => ' [IMPORTANT: use Dreamina Seedance 2.5 (supports a 30-second single take) and output exactly ONE video, a single continuous ' + cfg.duration + '-second clip (' + cfg.duration + 's total). Do NOT split into 2 videos, do NOT generate multiple videos, clips, parts, segments or scenes. One take, one file, ' + cfg.duration + ' seconds.]';
+  const DIRECTIVE = () => ' [IMPORTANT: use Dreamina Seedance 2.5 (supports a 30-second single take) and output exactly ONE video, a single continuous ' + cfg.duration + '-second clip (' + cfg.duration + 's total). Do NOT split into 2 videos, do NOT generate multiple videos, clips, parts, segments or scenes. One take, one file, ' + cfg.duration + ' seconds. Ingat: JANGAN ubah prompt, JANGAN memotong/meringkas prompt — gunakan prompt di atas apa adanya, kata demi kata. Do NOT rewrite, shorten, summarize or alter the prompt above; use it verbatim, exactly as written.]';
   const DIRECTIVE_RE = /output exactly ONE video, a single continuous/i;
 
   // Anime-reference note: Dola's moderation treats uploaded reference stills as real human faces and refuses /
@@ -889,7 +889,7 @@
       // Strategy: insist ONCE per conversation, and only when the REAL settings can deliver 30s (model 2.5).
       if (modelIs25 !== false && (realDuration === null || realDuration >= 30) && arCount('single') < 1) {
         insistCount++; arMark('single');
-        const reply = 'Gunakan model Dreamina Seedance 2.5 dengan durasi 30 detik (mendukung 30 detik satu take). Buat SATU video 30 detik utuh, jangan dibagi menjadi 2 video.';
+        const reply = 'Gunakan model Dreamina Seedance 2.5 dengan durasi 30 detik (mendukung 30 detik satu take). Buat SATU video 30 detik utuh, jangan dibagi menjadi 2 video. Ingat, jangan ubah prompt, jangan memotong prompt, biarkan apa adanya.';
         if (sendReply(reply)) toast('💬 Auto-reply (1×): minta 1×30s via Seedance 2.5');
         autoTune('refusal');
         return;
