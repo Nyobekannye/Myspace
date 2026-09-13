@@ -140,6 +140,7 @@ export class Store {
       status: ORDER_STATUS.PENDING,
       createdAt: new Date().toISOString(),
       proofFileId: null,
+      payment: null,
     };
     this.orders.push(order);
     this.#save(ORDERS_FILE, this.orders);
@@ -174,6 +175,33 @@ export class Store {
     order.status = ORDER_STATUS.PAID;
     this.#save(ORDERS_FILE, this.orders);
     return order;
+  }
+
+  setPayment(orderId, payment) {
+    const order = this.getOrder(orderId);
+    if (!order) return null;
+    order.payment = { ...(order.payment ?? {}), ...payment };
+    this.#save(ORDERS_FILE, this.orders);
+    return order;
+  }
+
+  // Pesanan QRIS yang masih menunggu pembayaran dan belum kedaluwarsa.
+  awaitingQrisPayment() {
+    return this.orders.filter(
+      (o) => o.status === ORDER_STATUS.PENDING && o.payment?.provider && !o.payment.paidAt,
+    );
+  }
+
+  // Tandai lunas otomatis. Idempoten: pembayaran kedua untuk pesanan yang sama diabaikan.
+  markPaid(orderId, { transactionId } = {}) {
+    const order = this.getOrder(orderId);
+    if (!order) return { error: "Pesanan tidak ditemukan." };
+    if (order.payment?.paidAt) return { order, alreadyPaid: true };
+    if (order.status === ORDER_STATUS.CANCELLED) return { order, error: "Pesanan sudah dibatalkan." };
+    order.payment = { ...(order.payment ?? {}), transactionId, paidAt: new Date().toISOString() };
+    order.status = ORDER_STATUS.CONFIRMED;
+    this.#save(ORDERS_FILE, this.orders);
+    return { order };
   }
 
   setStatus(orderId, status) {

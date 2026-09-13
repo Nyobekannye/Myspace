@@ -1,6 +1,9 @@
 import { config } from "./config.js";
 import { Store } from "./store.js";
 import { createBot } from "./bot.js";
+import { MidtransClient } from "./payment/midtrans.js";
+import { PaymentService } from "./payment/service.js";
+import { createWebhookServer } from "./payment/webhook.js";
 
 if (!config.botToken) {
   console.error("BOT_TOKEN belum diisi. Salin .env.example ke .env lalu isi tokennya.");
@@ -9,9 +12,45 @@ if (!config.botToken) {
 if (config.adminIds.length === 0) {
   console.warn("ADMIN_IDS kosong: notifikasi pesanan tidak akan dikirim ke siapa pun.");
 }
+if (config.paymentMode === "qris" && !config.midtrans.serverKey) {
+  console.error("PAYMENT_MODE=qris tapi MIDTRANS_SERVER_KEY kosong.");
+  process.exit(1);
+}
 
 const store = new Store();
-const bot = createBot(store);
+
+let paymentService = null;
+let webhookServer = null;
+let client = null;
+if (config.paymentMode === "qris") {
+  client = new MidtransClient(config.midtrans);
+  paymentService = new PaymentService({
+    client,
+    store,
+    api: null, // diisi setelah bot dibuat
+    adminIds: config.adminIds,
+    pollSeconds: config.midtrans.pollSeconds,
+  });
+}
+
+const bot = createBot(store, config.botToken, { paymentService });
+
+if (paymentService) {
+  paymentService.api = bot.api;
+  paymentService.startPolling();
+
+  if (config.webhook.port > 0) {
+    webhookServer = createWebhookServer({ client, paymentService, path: config.webhook.path });
+    webhookServer.listen(config.webhook.port, () =>
+      console.log(`Webhook Midtrans di http://0.0.0.0:${config.webhook.port}${config.webhook.path}`),
+    );
+  }
+  console.log(
+    `Pembayaran: QRIS via Midtrans (${config.midtrans.isProduction ? "PRODUCTION" : "sandbox"}, acquirer ${config.midtrans.acquirer}), polling tiap ${config.midtrans.pollSeconds}s`,
+  );
+} else {
+  console.log("Pembayaran: manual (transfer + bukti foto)");
+}
 
 await bot.api.setMyCommands([
   { command: "start", description: "Mulai & menu utama" },
@@ -24,7 +63,11 @@ await bot.api.setMyCommands([
   { command: "help", description: "Bantuan" },
 ]);
 
-const stop = () => bot.stop();
+const stop = () => {
+  paymentService?.stopPolling();
+  webhookServer?.close();
+  bot.stop();
+};
 process.once("SIGINT", stop);
 process.once("SIGTERM", stop);
 

@@ -14,7 +14,7 @@ const HELP_TEXT = `<b>Cara order:</b>
 2. /beli &lt;ID&gt; [jumlah] — tambah ke keranjang (contoh: <code>/beli P001 2</code>)
 3. /keranjang — cek keranjang
 4. /checkout — isi data pengiriman, pesanan dibuat otomatis
-5. Kirim foto bukti bayar ke bot ini
+5. ${config.paymentMode === "qris" ? "Scan QRIS yang dikirim bot, pembayaran terverifikasi otomatis" : "Kirim foto bukti bayar ke bot ini"}
 6. /pesanan — pantau status pesanan
 
 /batal — batalkan proses checkout`;
@@ -27,7 +27,7 @@ const ADMIN_HELP = `<b>Perintah admin:</b>
 /order &lt;ID_PESANAN&gt; — detail pesanan
 /setstatus &lt;ID_PESANAN&gt; &lt;${Object.values(ORDER_STATUS).join("|")}&gt;`;
 
-export function createBot(store, token = config.botToken) {
+export function createBot(store, token = config.botToken, { paymentService = null } = {}) {
   const bot = new Bot(token);
   // State checkout per user: { step, data }
   const checkoutState = new Map();
@@ -140,10 +140,34 @@ export function createBot(store, token = config.botToken) {
   bot.command("pesanan", sendMyOrders);
   bot.hears("📦 Pesanan Saya", sendMyOrders);
 
-  // Foto = bukti bayar untuk pesanan terakhir yang belum dibayar
+  // Tombol "Cek status" pada pesan QRIS
+  bot.callbackQuery(/^paycheck:(.+)$/, async (ctx) => {
+    const order = store.getOrder(ctx.match[1]);
+    if (!order || order.userId !== ctx.from.id) return ctx.answerCallbackQuery({ text: "Pesanan tidak ditemukan." });
+    if (order.payment?.paidAt) return ctx.answerCallbackQuery({ text: "Sudah dibayar ✅", show_alert: true });
+    if (order.status !== ORDER_STATUS.PENDING) return ctx.answerCallbackQuery({ text: `Status: ${order.status}` });
+    if (!paymentService) return ctx.answerCallbackQuery({ text: "Pengecekan otomatis tidak aktif." });
+    try {
+      const result = await paymentService.refresh(order.id);
+      const msg = { paid: "Pembayaran diterima ✅", failed: "QR gagal/kedaluwarsa ❌" }[result.outcome] ?? "Belum ada pembayaran masuk.";
+      await ctx.answerCallbackQuery({ text: msg, show_alert: result.outcome !== "pending" });
+    } catch (err) {
+      console.error("Cek status gagal:", err.message);
+      await ctx.answerCallbackQuery({ text: "Gagal cek status, coba lagi sebentar." });
+    }
+  });
+
+  // Foto = bukti bayar untuk pesanan terakhir yang belum dibayar (mode manual)
   bot.on("message:photo", async (ctx) => {
     const order = store.latestUnpaidOrder(ctx.from.id);
     if (!order) return ctx.reply("Tidak ada pesanan yang menunggu pembayaran.");
+    if (order.payment?.provider) {
+      return ctx.reply(
+        `Pesanan <b>${order.id}</b> dibayar lewat QRIS, tidak perlu kirim bukti. ` +
+          `Scan QR yang sudah dikirim, lalu tekan 🔄 Cek status jika belum terupdate.`,
+        html,
+      );
+    }
     const photo = ctx.message.photo.at(-1);
     store.attachProof(order.id, photo.file_id);
     await ctx.reply(
@@ -294,12 +318,23 @@ export function createBot(store, token = config.botToken) {
       const result = store.checkout(ctx.from.id, { ...state.data, username: ctx.from.username });
       if (result.error) return ctx.reply(`Checkout gagal: ${result.error}`);
       const { order } = result;
+      await notifyAdmins(`🆕 Pesanan baru!\n\n${formatOrder(order, { forAdmin: true })}`);
+
+      if (paymentService) {
+        await ctx.reply(formatOrder(order), html);
+        try {
+          await paymentService.sendQris(order, ctx.chat.id);
+          return;
+        } catch (err) {
+          console.error("Gagal membuat QRIS:", err.message);
+          await ctx.reply("⚠️ QRIS sementara tidak tersedia, silakan bayar manual:");
+        }
+      }
       await ctx.reply(
-        `${formatOrder(order)}\n\n💳 <b>Pembayaran</b>\n${escapeHtml(config.paymentInfo)}\n\n` +
+        `${paymentService ? "" : formatOrder(order) + "\n\n"}💳 <b>Pembayaran</b>\n${escapeHtml(config.paymentInfo)}\n\n` +
           `Total yang harus dibayar: <b>${rupiah(order.total)}</b>\nSetelah transfer, kirim foto bukti bayar ke sini.`,
         html,
       );
-      await notifyAdmins(`🆕 Pesanan baru!\n\n${formatOrder(order, { forAdmin: true })}`);
     }
   });
 
