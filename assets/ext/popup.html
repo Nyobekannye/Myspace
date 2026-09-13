@@ -14,22 +14,35 @@
             <img src="brand-icon.svg" class="logo" alt="">
             <div class="hdr-copy">
                 <h1>Sesi</h1>
-                <span class="sub">MAX MODE <span class="dot">·</span> v2.4 <span class="dot">·</span> by Whempy &amp; Dhon</span>
+                <span class="sub">MAX MODE <span class="dot">·</span> v2.5 <span class="dot">·</span> by Whempy &amp; Dhon</span>
             </div>
             <span class="status" id="status-pill" data-state="idle"><i class="led" aria-hidden="true"></i><span id="status-text">…</span></span>
         </header>
 
-        <!-- MAX MODE banner -->
+        <!-- MAX MODE quick toggles -->
         <section class="max-banner" aria-label="MAX MODE">
-            <div class="max-led" aria-hidden="true"></div>
-            <div class="max-copy">
-                <b>MAX MODE active</b>
-                <span>1 video × 30s · Max HD · No watermark</span>
+            <div class="max-row">
+                <div class="max-led" id="led-single" aria-hidden="true"></div>
+                <div class="max-copy">
+                    <b>Paksa 1 video × 30s</b>
+                    <span>Satu klip 30 detik utuh, Seedance 2.5 — bukan 2 video</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="sw-single-clip" checked>
+                    <span class="knob"></span>
+                </label>
             </div>
-            <label class="ios-switch locked" title="MAX MODE is always on">
-                <input type="checkbox" checked disabled>
-                <span class="knob"></span>
-            </label>
+            <div class="max-row">
+                <div class="max-led" id="led-anime" aria-hidden="true"></div>
+                <div class="max-copy">
+                    <b>Referensi = animasi</b>
+                    <span>Paksa Dola anggap foto referensi sebagai karakter animasi, bukan wajah asli</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="sw-anime-ref" checked>
+                    <span class="knob"></span>
+                </label>
+            </div>
         </section>
 
         <!-- Stats -->
@@ -64,17 +77,6 @@
                 </label>
             </div>
             <div class="row">
-                <div class="row-icon time" aria-hidden="true">1×</div>
-                <div class="row-copy">
-                    <span class="row-title">Paksa 1 video × 30s</span>
-                    <span class="row-sub">Satu klip 30 detik utuh — bukan 2 video</span>
-                </div>
-                <label class="ios-switch">
-                    <input type="checkbox" id="sw-single-clip" checked>
-                    <span class="knob"></span>
-                </label>
-            </div>
-            <div class="row">
                 <div class="row-icon hd" aria-hidden="true">⚡</div>
                 <div class="row-copy">
                     <span class="row-title">Mode Ganas</span>
@@ -93,17 +95,6 @@
                 </div>
                 <label class="ios-switch">
                     <input type="checkbox" id="sw-force-25" checked>
-                    <span class="knob"></span>
-                </label>
-            </div>
-            <div class="row">
-                <div class="row-icon hd" aria-hidden="true">🎨</div>
-                <div class="row-copy">
-                    <span class="row-title">Referensi = karakter animasi</span>
-                    <span class="row-sub">Paksa Dola anggap foto referensi sebagai gambar animasi, bukan wajah orang asli</span>
-                </div>
-                <label class="ios-switch">
-                    <input type="checkbox" id="sw-anime-ref" checked>
                     <span class="knob"></span>
                 </label>
             </div>

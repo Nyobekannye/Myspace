@@ -1,5 +1,5 @@
 /**
- * Sesi MAX MODE v2.4 by Whempy & Dhon — iOS 17 style popup.
+ * Sesi MAX MODE v2.5 by Whempy & Dhon — iOS 17 style popup.
  * 30s · Max HD · no watermark are locked. Auto-download is a user setting (default OFF,
  * toggle in Settings). The UI shows status, a Scan button and a per-video download list for the most recent Dola tab.
  * Works as a side panel (desktop) and as a standalone tab (Kiwi & other mobile browsers).
@@ -146,6 +146,7 @@
     const swSplit = $('sw-accept-split');
     const swForce25 = $('sw-force-25');
     const swAnime = $('sw-anime-ref');
+    const leds = () => { $('led-single').classList.toggle('off', !swSingle.checked); $('led-anime').classList.toggle('off', !swAnime.checked); };
     chrome.storage.local.get(['singleClip', 'aggressiveMode', 'autoAcceptSplit', 'forceModel25', 'animeRef'], res => {
         void chrome.runtime.lastError;
         swSingle.checked = res?.singleClip !== false;
@@ -153,8 +154,10 @@
         swSplit.checked = res?.autoAcceptSplit === true;
         swForce25.checked = res?.forceModel25 !== false;
         swAnime.checked = res?.animeRef !== false;
+        leds();
     });
     swAnime.addEventListener('change', () => {
+        leds();
         chrome.storage.local.set({ animeRef: swAnime.checked }, () => void chrome.runtime.lastError);
         setHint(swAnime.checked ? 'Referensi animasi AKTIF — setiap prompt video dengan gambar referensi diberi catatan "ini karakter animasi, bukan orang asli", dan penolakan "wajah asli" dijawab otomatis.' : 'Referensi animasi nonaktif — Dola menilai gambar referensi apa adanya.', 'ok');
     });
@@ -167,6 +170,7 @@
         setHint(swSplit.checked ? 'Auto-terima 2×15s AKTIF — kalau Dola menolak 30s, dijawab "Ya" otomatis.' : 'Auto-terima nonaktif — kamu putuskan manual saat Dola menawarkan 2 video.', 'ok');
     });
     swSingle.addEventListener('change', () => {
+        leds();
         chrome.storage.local.set({ singleClip: swSingle.checked }, () => void chrome.runtime.lastError);
         setHint(swSingle.checked ? 'Paksa 1 video × 30s AKTIF — payload, prompt & jawaban chat dipaksa jadi satu klip.' : 'Paksa 1 video dimatikan — Dola boleh membagi jadi beberapa klip.', 'ok');
     });
@@ -181,6 +185,7 @@
         if (changes.autoAcceptSplit) swSplit.checked = changes.autoAcceptSplit.newValue === true;
         if (changes.forceModel25) swForce25.checked = changes.forceModel25.newValue !== false;
         if (changes.animeRef) swAnime.checked = changes.animeRef.newValue !== false;
+        leds();
     });
 
     refresh();
